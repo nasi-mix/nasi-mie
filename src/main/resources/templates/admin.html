@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:color="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>国际交流 - 用户管理系统</title>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/webjars/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+</head>
+<body>
+<div class="container">
+    <h3>国际交流 - 用户管理系统</h3>
+    <hr>
+    <button class="btn btn-success addUser"><span class="glyphicon glyphicon-plus"></span> 新增用户</button>
+    <a class="btn btn-danger" href="/logout"><span class="glyphicon glyphicon-log-out"></span> 注销</a>
+    <div class="card">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>No.</th>
+                <th>微信账号</th>
+                <th>昵称</th>
+                <th>服务区</th>
+                <th>开始日期</th>
+                <th>结束日期</th>
+                <th>付款状态</th>
+                <th>用户操作</th>
+                <th>服务状态</th>
+                <th>运行端口</th>
+                <th>服务器操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user,it:${users.content}">
+                <td th:text="${user.id}"></td>
+                <td>
+                    <div th:if="${!#strings.isEmpty(user.icon)}" th:utext="${user.icon}" th:remove="tag">
+                    </div>
+                    <span th:text="${user.wechatName}"></span>
+                </td>
+                <td th:text="${user.nickname}"></td>
+                <td th:text="${user.containerLocation}"></td>
+                <td th:text="${#dates.format(user.startTime, 'yyyy-MM-dd')}"></td>
+                <td th:text="${#dates.format(user.endTime, 'yyyy-MM-dd')}"></td>
+                <td th:utext="${user.isEnable}?'<span class=\'label label-success btn-xs\'>已付款</span>':'<span class=\'label label-danger btn-xs\'>未付款</span>'"></td>
+                <td>
+                    <button th:attr="data-id=${user.id}" class="btn btn-primary btn-xs editBtn"><span
+                            class="glyphicon glyphicon-pencil"></span> 编辑
+                    </button>
+                    <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
+                       th:href="'/delete?id='+${user.id}+'&role=admin'" class="btn btn-danger btn-xs"><span
+                            class="glyphicon glyphicon-trash"></span> 删除</a>
+                </td>
+
+                <td>
+                    <span th:if="${user.containerStatus=='running'}" class="label label-success btn-xs">正在运行</span>
+                    <span th:if="${user.containerStatus=='created'}" class="label label-warning btn-xs">等待</span>
+                    <span th:if="${user.containerStatus=='exited'}" class="label label-danger btn-xs">停止</span>
+                </td>
+                <td>
+                    <span th:text="${user.containerPort}"></span>
+                </td>
+                <td>
+                    <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
+                       th:if="${user.containerStatus=='exited'}"
+                       th:href="'/startContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
+                       class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-play"></span> 启动</a>
+                    <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
+                       th:if="${user.containerStatus=='created'}"
+                       th:href="'/startContainer?id='+${user.containerId}+'&role=admin&page='+${currentPage}"
+                       class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-play"></span> 开始服务</a>
+                    <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
+                       th:if="${user.containerStatus=='running'}"
+                       th:href="'/stopContainer?id='+${user.containerId}+'&role=admin&page='+${currentPage}"
+                       class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-off"></span> 停止</a>
+                    <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
+                       th:if="${user.containerStatus=='running'}"
+                       th:href="'/restartContainer?id='+${user.containerId}+'&role=admin&page='+${currentPage}"
+                       class="btn btn-warning btn-xs"><span class="glyphicon glyphicon-refresh"></span> 重启</a>
+                    <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
+                       th:if="${!#strings.isEmpty(user.containerId)}"
+                       th:href="'/deleteContainer?id='+${user.containerId}+'&role=admin&page='+${currentPage}"
+                       class="btn btn-default btn-xs"><span class="glyphicon glyphicon-trash"></span> 清空容器</a>
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+        <hr>
+        <nav aria-label="Page navigation">
+            <ul th:if="${users.getTotalPages()!=0}" class="pagination">
+                <li><a href="#" aria-label="Previous"> <span aria-hidden="true">«</span> </a></li>
+
+                <li th:classappend="(${currentPage}==${i})?'active':''"
+                    th:each="i:${#numbers.sequence(0,users.getTotalPages()-1)}">
+                    <a th:href="@{/admin(page=${i})}" th:text="${i}+1">1</a>
+                </li>
+
+                <li><a href="#" aria-label="Next"> <span aria-hidden="true">»</span> </a></li>
+            </ul>
+        </nav>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <form th:action="@{/save}" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">新用户/修改</h4>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="id" name="id">
+                        <input type="hidden" id="qrCode" name="qrCode">
+                        <input type="hidden" id="containerId" name="containerId">
+                        <input type="hidden" id="containerPort" name="containerPort">
+                        <input type="hidden" id="containerStatus" name="containerStatus">
+
+                        <div class="form-group">
+                            <label for="wechatName">微信账号</label>
+                            <input autocomplete="off" type="text" id="wechatName" name="wechatName"
+                                   class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="nickname">昵称</label>
+                            <input autocomplete="off" type="text" id="nickname" name="nickname" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="containerLocation">服务区</label>
+                            <select id="containerLocation" name="containerLocation" class="form-control">
+                                <option th:each="location,it:${locations}" th:text="${location}" th:value="${location}">区域列表</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="startTime">开始日期</label>
+                            <input autocomplete="off" type="text" id="startTime" name="startTime"
+                                   class="form-control date">
+                        </div>
+                        <div class="form-group">
+                            <label for="endTime">结束日期</label>
+                            <input autocomplete="off" type="text" id="endTime" name="endTime" class="form-control date">
+                        </div>
+                        <div class="form-group">
+                            <label for="isEnableOui">是否付款</label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="isEnable" id="isEnableOui" value="true">
+                                    是
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="isEnable" id="isEnableNon" value="false">否
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="icon">超级图标</label>
+                            <!--                            <div class="checkbox">
+                                    <label>
+                                        <input name="icon" value="fas fa-star" type="checkbox"> <i style="color: #f0ad4e;" class="fas fa-star"></i>
+                                    </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input name="icon" value="fas fa-moon" type="checkbox"> <i style="color: #f0ad4e;" class="fas fa-moon"></i>
+                                    </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input name="icon" value="fas fa-sun" type="checkbox"> <i style="color: #f0ad4e;" class="fas fa-sun"></i>
+                                    </label>
+                                </div>-->
+                            <input autocomplete="off" value='<i style="color:#f0ad4e;" class="fas fa-star"></i>'
+                                   type="text" id="icon" name="icon" class="form-control">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <input class="btn btn-primary" type="submit" value="保存"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="//cdn.jsdelivr.net/webjars/jquery/3.1.1/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/webjars/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script src="/webjars/moment/2.19.3/min/moment-with-locales.min.js"></script>
+<script src="/js/bootstrap-datetimepicker.min.js"></script>
+</body>
+<script src="/js/app.js"></script>
+<script>
+    $('.date').datetimepicker({
+        format: 'YYYY-MM-DD'
+    });
+</script>
+</html>

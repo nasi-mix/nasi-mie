@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>用户自助操作</title>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/webjars/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+</head>
+<body>
+<div class="container">
+    <h3>服务详情</h3>
+    <hr>
+    <div th:if="${info=='error'}" class="alert alert-danger" role="alert">未找到该用户 ！</div>
+    <a href="/" class="btn btn-warning" th:if="${info=='error'}"><span class="glyphicon glyphicon-share-alt"></span> 返回</a>
+    <div th:if="${info=='success'}" class="alert alert-info" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+        </button>
+        <p th:if="${#strings.isEmpty(user.nickname)}">
+            欢迎回来， <b th:text="${user.wechatName}"></b>
+        </p>
+        <p th:if="${!#strings.isEmpty(user.nickname)}">
+            欢迎回来， <b th:text="${user.nickname}"></b>
+        </p>
+    </div>
+    <div th:if="${info=='success' and !user.isEnable}" class="alert alert-danger" role="alert">
+        <p>请检查付款状态或联系管理员</p>
+        <p>支付宝: qfdk2010@gmail.com (转账时请留下微信id)</p>
+    </div>
+
+    <div th:if="${info=='success'}" th:remove="tag">
+        <div class="form-inline col-md-10 col-md-offset-2" style="font-size: 1.2em;">
+            <div class="form-group col-md-5">
+                <label class="control-label" for="wechatName">微信账号：</label>
+                <p class="form-control-static" id="wechatName">
+                <div th:if="${!#strings.isEmpty(user.icon)}" th:utext="${user.icon}" th:remove="tag">
+                </div>
+                <b th:text="${user.wechatName}"></b>
+                </p>
+
+            </div>
+            <div class="form-group col-md-5">
+                <label class="control-label" for="isEnable">是否付款：</label>
+                <p class="form-control-static" id="isEnable"
+                   th:utext="${user.isEnable}?'<span class=\'label label-success\'>已付款</span>':'<span class=\'label label-danger\'>未付款</span>'"></p>
+            </div>
+        </div>
+        <div class="form-inline col-md-10 col-md-offset-2" style="font-size: 1.2em;">
+            <div class="form-group col-md-5">
+                <label class="control-label" for="containerLocation">服务区域：</label>
+                <p class="form-control-static" id="containerLocation"
+                   th:text="${user.containerLocation}"></p>
+
+            </div>
+
+            <div class="form-group  col-md-5">
+                <label class="ccontrol-label" for="containerStatus">服务状态：</label>
+                <p class="form-control-static" id="containerStatus">
+                    <span th:if="${user.containerStatus=='running'}" class="label label-success">正在运行</span>
+                    <span th:if="${user.containerStatus=='created'}" class="label label-warning">等待</span>
+                    <span th:if="${user.containerStatus=='exited'}" class="label label-danger">停止</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="form-inline col-md-10 col-md-offset-2" style="font-size: 1.2em;">
+            <div class="form-group col-md-5">
+                <label class="ontrol-label" for="endTime">结束时间：</label>
+
+                <p class="form-control-static" id="endTime"
+                   th:text="${#dates.format(user.endTime, 'yyyy-MM-dd')}"></p>
+
+            </div>
+
+            <div class="form-group col-md-5">
+                <label class="control-label" for="operation">自主操作：</label>
+                <p class="form-control-static" id="operation">
+                    <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..." data-toggle="tooltip"
+                       data-placement="top" title="启动服务，成功后扫码二维码即可" th:if="${user.containerStatus=='exited'}"
+                       th:href="'/startContainer?id='+${user.containerId}+'&role='+${user.wechatName}"
+                       class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-play"></span> 启动</a>
+                    <a th:classappend="${user.isEnable}?'':'disabled'"data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
+                       th:if="${user.containerStatus=='created'}"
+                       th:href="'/startContainer?id='+${user.containerId}+'&role='+${user.wechatName}"
+                       class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-play"></span> 开始服务</a>
+                    <a th:classappend="${user.isEnable}?'':'disabled'"data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..." data-toggle="tooltip"
+                       data-placement="top" title="停止服务，您将无法连接服务器" th:if="${user.containerStatus=='running'}"
+                       th:href="'/stopContainer?id='+${user.containerId}+'&role='+${user.wechatName}"
+                       class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-off"></span> 停止</a>
+                    <a th:classappend="${user.isEnable}?'':'disabled'"data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..." data-toggle="tooltip"
+                       data-placement="top" title="重启的时间可能会很长，但是小于30s" th:if="${user.containerStatus=='running'}"
+                       th:href="'/restartContainer?id='+${user.containerId}+'&role='+${user.wechatName}"
+                       class="btn btn-warning btn-xs"><span class="glyphicon glyphicon-refresh"></span> 重启</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <hr>
+            <h4 class="text-center">扫描二维码开始新生活</h4>
+            <img id="url" class="img-responsive center-block" th:src="@{/user/qrCode/__${user.getQrCode()}__}" alt="二维码">
+        </div>
+    </div>
+</div>
+<script src="//cdn.jsdelivr.net/webjars/jquery/3.1.1/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/webjars/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+</body>
+<script>
+    loading();
+    tooltips();
+    function loading() {
+        $('a.btn').on('click', function () {
+            var $btn = $(this).button('loading');
+        });
+    }
+    function tooltips(){
+        $('[data-toggle="tooltip"]').tooltip();
+    }
+</script>
+</html>

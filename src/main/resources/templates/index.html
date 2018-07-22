@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>RENNES - 雷恩小伙伴管理</title>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/webjars/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+</head>
+<body>
+<div class="container">
+    <h3>小伙伴信息查询</h3>
+    <hr>
+    <div class="alert alert-info" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+        </button>
+        欢迎在雷恩奋斗过的小伙伴们，推荐微信名片 ：）
+    </div>
+
+    <form action="/user/findUserByWechatName" method="get">
+        <div class="input-group col-md-6 col-md-offset-3">
+            <span class="input-group-addon" id="basic-addon1">@</span>
+            <input autocomplete="off" name="wechatName" type="text" class="form-control" placeholder="微信用户名"
+                   aria-describedby="basic-addon1">
+            <div class="input-group-btn">
+                <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span> 查询
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>
