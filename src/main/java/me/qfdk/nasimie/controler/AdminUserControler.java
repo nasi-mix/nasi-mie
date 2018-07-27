@@ -71,9 +71,9 @@ public class AdminUserControler {
 
     @GetMapping("/admin")
     public String show(Authentication authentication, Model model, @RequestParam(defaultValue = "0") int page) {
+        model.addAttribute("locations", getLocations());
         model.addAttribute("users", userRepository.findAll(PageRequest.of(page, 10)));
         model.addAttribute("currentPage", page);
-        model.addAttribute("locations", getLocations());
         this.currentPage = page;
         return "admin";
     }
