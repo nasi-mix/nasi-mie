@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Controller()
 public class AdminUserControler {
@@ -81,16 +82,12 @@ public class AdminUserControler {
     public String save(User user) throws IOException {
         // 新用户
         if (user.getId() == null || StringUtils.isEmpty(user.getContainerId())) {
-            String pass = new StringBuffer(user.getWechatName()).reverse().toString();
-            String port = Outil.getRandomPort();
-
-            String containerId = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName(), String.class).getBody();
-            String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/info?id=" + containerId, String.class).getBody();
+            Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName(), Map.class).getBody();
             String host = client.getInstances(user.getContainerLocation()).get(0).getHost();
-            user.setContainerId(containerId);
-            user.setContainerStatus(status);
-            user.setContainerPort(port);
-            user.setQrCode(Outil.getSSRUrl(host, port, pass));
+            user.setContainerId(info.get("containerId"));
+            user.setContainerStatus(info.get("status"));
+            user.setContainerPort(info.get("port"));
+            user.setQrCode(Outil.getSSRUrl(host, info.get("port"), info.get("pass")));
         }
         userRepository.save(user);
         redisTemplate.opsForValue().set(user.getId().toString(), user);
