@@ -1,25 +1,9 @@
-# Nasi 
-
-一款基于docker于spring cloud 构成的集合
-
-- Nasi
-    - nasi-mie
-    - nasi-campur
-    - nasi-eureka
-
-
 ## Nasi Mie
 
-Nasi Mie 是一款 `nasi-campur` 界面管理软件
+管理界面，需要配合 nasi-eureka 和nasi-campur 使用
 
 
-## Nasi Campur
-
-Nasi Campur 是一款 提供镜像微服务的模块
-
-## Nasi Eureka
-
-Nasi Eureka 是一款发现nasi 微服务的框架
+使用前需要导入sql文件
 
 ## 必需软件
 
