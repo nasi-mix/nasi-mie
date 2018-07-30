@@ -8,11 +8,19 @@
 ## 必需软件
 
 - Java 1.8 +
-- Redis
 - Mysql
+- Redis
+
+
+## Mysql + phpmyadmin
+```bash
+docker run -d -h mysql -p 3306:3306 --name mysql -e MYSQL_ROOT_PASSWORD=root mysql:5.6
+docker run --name phpadmin --link mysql:db -p 9998:80 -d phpmyadmin/phpmyadmin
+#docker exec -it phpadmin vi /www/libraries/config.default.php
+#$cfg['AllowThirdPartyFraming'] = true; 嵌入其他页面
+```
 
 ## Redis
-
 ```bash
 docker run --name redis -p 6379:6379 -d redis
 ```
