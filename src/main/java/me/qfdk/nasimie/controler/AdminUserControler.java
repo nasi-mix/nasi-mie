@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -34,9 +33,6 @@ public class AdminUserControler {
     private UserRepository userRepository;
 
     @Autowired
-    RedisTemplate redisTemplate;
-
-    @Autowired
     private DiscoveryClient client;
 
     @Autowired
@@ -53,6 +49,11 @@ public class AdminUserControler {
     @GetMapping("/")
     public String index() {
         return "index";
+    }
+
+    @GetMapping("/help")
+    public String help() {
+        return "help";
     }
 
     @GetMapping("/login")
@@ -90,8 +91,6 @@ public class AdminUserControler {
             user.setQrCode(Outil.getSSRUrl(host, info.get("port"), info.get("pass")));
         }
         userRepository.save(user);
-        redisTemplate.opsForValue().set(user.getId().toString(), user);
-        redisTemplate.opsForValue().set(user.getWechatName(), user);
         return "redirect:/admin?page=" + this.currentPage;
     }
 
@@ -105,8 +104,6 @@ public class AdminUserControler {
         user.setContainerLocation("");
         user.setQrCode("");
         userRepository.save(user);
-        redisTemplate.opsForValue().set(user.getId().toString(), user);
-        redisTemplate.opsForValue().set(user.getWechatName(), user);
         if (role.equals("admin")) {
             return "redirect:/admin?page=" + this.currentPage;
         }
@@ -119,8 +116,6 @@ public class AdminUserControler {
         String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/startContainer?id=" + containerId, String.class).getBody();
         user.setContainerStatus(status);
         userRepository.save(user);
-        redisTemplate.opsForValue().set(user.getId().toString(), user);
-        redisTemplate.opsForValue().set(user.getWechatName(), user);
         if (role.equals("admin")) {
             return "redirect:/admin?page=" + this.currentPage;
         }
@@ -134,8 +129,6 @@ public class AdminUserControler {
         String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/restartContainer?id=" + containerId, String.class).getBody();
         user.setContainerStatus(status);
         userRepository.save(user);
-        redisTemplate.opsForValue().set(user.getId().toString(), user);
-        redisTemplate.opsForValue().set(user.getWechatName(), user);
         if (role.equals("admin")) {
             return "redirect:/admin?page=" + this.currentPage;
         }
@@ -148,8 +141,6 @@ public class AdminUserControler {
         String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/stopContainer?id=" + containerId, String.class).getBody();
         user.setContainerStatus(status);
         userRepository.save(user);
-        redisTemplate.opsForValue().set(user.getId().toString(), user);
-        redisTemplate.opsForValue().set(user.getWechatName(), user);
         if (role.equals("admin")) {
             return "redirect:/admin?page=" + this.currentPage;
         }
@@ -164,8 +155,6 @@ public class AdminUserControler {
             restTemplate.getForEntity("http://" + user.getContainerLocation() + "/deleteContainer?id=" + containerId, Integer.class).getBody();
         }
         userRepository.deleteById(id);
-        redisTemplate.opsForValue().getOperations().delete(id.toString());
-        redisTemplate.opsForValue().getOperations().delete(user.getWechatName());
         if (role.equals("admin")) {
             return "redirect:/admin?page=" + this.currentPage;
         }
@@ -175,25 +164,17 @@ public class AdminUserControler {
     @GetMapping("/findUserById")
     @ResponseBody
     public User findUserById(@RequestParam("id") Integer id) {
-        User user;
-        if (redisTemplate.opsForValue().get(id.toString()) != null) {
-            user = (User) redisTemplate.opsForValue().get(id.toString());
-        } else {
-            user = userRepository.findById(id).get();
-            redisTemplate.opsForValue().set(id.toString(), user);
-            redisTemplate.opsForValue().set(user.getWechatName(), user);
-        }
-        return user;
+        return userRepository.findById(id).get();
     }
 
     public List<String> getLocations() {
         List<String> services = client.getServices();
-        List<String> avalibleServices = new ArrayList<>();
+        List<String> available_Services = new ArrayList<>();
         for (String service : services) {
             if (service.indexOf("campur") != -1) {
-                avalibleServices.add(service);
+                available_Services.add(service);
             }
         }
-        return avalibleServices;
+        return available_Services;
     }
 }

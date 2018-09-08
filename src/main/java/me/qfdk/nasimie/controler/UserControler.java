@@ -4,7 +4,6 @@ import me.qfdk.nasimie.entity.User;
 import me.qfdk.nasimie.repository.UserRepository;
 import net.glxn.qrgen.QRCode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,9 +16,6 @@ public class UserControler {
     @Autowired
     UserRepository userRepository;
 
-    @Autowired
-    RedisTemplate redisTemplate;
-
     @GetMapping("/")
     public String index() {
         return "index";
@@ -27,13 +23,8 @@ public class UserControler {
 
     @GetMapping("/findUserByWechatName")
     public String findUserByWechatName(Model model, @RequestParam("wechatName") String wechatName) {
-        User user;
-        if (redisTemplate.opsForValue().get(wechatName.trim()) != null) {
-            user = (User) redisTemplate.opsForValue().get(wechatName.trim());
-        } else {
-            user = userRepository.findByWechatName(wechatName.trim());
-            redisTemplate.opsForValue().set(wechatName.trim(), user);
-        }
+        User user = userRepository.findByWechatName(wechatName.trim());
+
         if (user != null) {
             model.addAttribute("info", "success");
             model.addAttribute("user", user);
