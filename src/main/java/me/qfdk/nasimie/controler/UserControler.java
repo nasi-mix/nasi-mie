@@ -34,12 +34,13 @@ public class UserControler {
         return "user";
     }
 
-    @RequestMapping(value = "/qrCode/{qrCode}", method = RequestMethod.GET)
-    public HttpEntity<byte[]> qr(@PathVariable String qrCode) {
+    @RequestMapping(value = "/qrCode", method = RequestMethod.GET)
+    public HttpEntity<byte[]> qr(@RequestParam("str")  String qrCode) {
         byte[] bytes = QRCode.from("ssr://" + qrCode).withSize(250, 250).stream().toByteArray();
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_PNG);
         headers.setContentLength(bytes.length);
         return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.CREATED);
     }
+
 }

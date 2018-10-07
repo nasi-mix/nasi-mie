@@ -49,7 +49,14 @@ restart(){
   start
 }
 
+compile(){
+    ./mvnw clean install -DskipTests
+}
+
 case "$1" in
+  "compile")
+    compile
+    ;;
   "start")
     start
     ;;

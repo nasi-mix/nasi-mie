@@ -99,7 +99,7 @@
         <div class="col-md-12">
             <hr>
             <h4 class="text-center">扫描二维码开始新生活</h4>
-            <img id="url" class="img-responsive center-block" th:src="@{/user/qrCode/__${user.getQrCode()}__}" alt="二维码">
+            <img id="url" class="img-responsive center-block" th:src="@{/user/qrCode?str=__${user.getQrCode()}__}" alt="二维码">
         </div>
     </div>
 </div>

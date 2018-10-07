@@ -88,7 +88,7 @@ public class AdminUserControler {
             user.setContainerId(info.get("containerId"));
             user.setContainerStatus(info.get("status"));
             user.setContainerPort(info.get("port"));
-            user.setQrCode(Outil.getSSRUrl(host, info.get("port"), info.get("pass")));
+            user.setQrCode(Outil.getSSRUrl(host, info.get("port"), info.get("pass"),user.getContainerLocation()));
         }
         userRepository.save(user);
         return "redirect:/admin?page=" + this.currentPage;
