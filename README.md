@@ -1,11 +1,9 @@
-## Nasi Mie
+## Nasi Mie [![Build Status](https://travis-ci.org/nasi-mix/nasi-mie.svg?branch=master)](https://travis-ci.org/nasi-mix/nasi-mie)
 
-管理界面，需要配合 nasi-eureka 和nasi-campur 使用
+Control interface, need to use nasi-eureka  and nasi-campur
 
 
-使用前需要导入sql文件
-
-## 必需软件
+## Pre-require
 
 - Java 1.8 +
 - Mysql
