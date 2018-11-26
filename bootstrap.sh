@@ -56,7 +56,16 @@ compile(){
     ./mvnw clean install -DskipTests
 }
 
+go(){
+    stop
+    compile
+    start
+}
+
 case "$1" in
+  "go")
+    go
+    ;;
   "compile")
     compile
     ;;

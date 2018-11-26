@@ -1,11 +1,11 @@
 eureka:
     client:
         serviceUrl:
-            defaultZone: http://localhost:8761/eureka/
+            defaultZone: http://user:pass@localhost:8761/eureka/
     instance:
         ip-address:
         prefer-ip-address: true
-        instance-id: ${eureka.instance.ipAddress}:${spring.application.name}:${server.port}
+        instance-id: ${eureka.instance.ip-address}:${spring.application.name}:${server.port}
 server:
     port: 8899
 spring:
