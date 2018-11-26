@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>国际交流 - 用户管理系统</title>
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/webjars/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/bootstrap-datetimepicker.min.css">
+    <meta http-equiv="refresh" content="30">
+    <title>NASI 管理面板</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 </head>
 <body>
 <div class="container">
-    <h3>国际交流 - 用户管理系统</h3>
+    <h3>NASI 管理面板</h3>
     <hr>
     <button class="btn btn-success addUser"><span class="glyphicon glyphicon-plus"></span> 新增用户</button>
+    <a class="btn btn-primary refresh" href="/reCreateAllContainers"><span class="glyphicon glyphicon-refresh"></span> 重建所有容器</a>
+    <a class="btn btn-primary refresh" href="/refreshNetwork"><span class="glyphicon glyphicon-refresh"></span> 刷新流量</a>
     <a class="btn btn-danger" href="/logout"><span class="glyphicon glyphicon-log-out"></span> 注销</a>
     <div class="card">
         <table class="table table-hover">
@@ -22,10 +25,10 @@
                 <th>No.</th>
                 <th>微信账号</th>
                 <th>昵称</th>
-                <th>服务区</th>
-                <th>开始日期</th>
                 <th>结束日期</th>
                 <th>付款状态</th>
+                <th>自主控制</th>
+                <th>使用流量</th>
                 <th>用户操作</th>
                 <th>服务状态</th>
                 <th>运行端口</th>
@@ -41,10 +44,17 @@
                     <span th:text="${user.wechatName}"></span>
                 </td>
                 <td th:text="${user.nickname}"></td>
-                <td th:text="${user.containerLocation}"></td>
-                <td th:text="${#dates.format(user.startTime, 'yyyy-MM-dd')}"></td>
                 <td th:text="${#dates.format(user.endTime, 'yyyy-MM-dd')}"></td>
                 <td th:utext="${user.isEnable}?'<span class=\'label label-success btn-xs\'>已付款</span>':'<span class=\'label label-danger btn-xs\'>未付款</span>'"></td>
+                <td th:utext="${user.isEnableSelfControl()}?'<span class=\'label label-primary btn-xs\'>自主控制</span>':'<span class=\'label label-warning btn-xs\'>未达到要求</span>'"></td>
+                <td>
+                    <th:block th:if="${user.getNetworkRx()+user.getNetworkTx()<1000}">
+                        <span id="networkTraffic" class="form-control-static" th:text="${#numbers.formatDecimal(user.getNetworkRx()+user.getNetworkTx(), 1, 2)}"></span><span> MB</span>
+                    </th:block>
+                    <th:block th:if="${user.getNetworkRx()+user.getNetworkTx()>=1000}">
+                        <span id="networkTraffic" class="form-control-static" th:text="${#numbers.formatDecimal((user.getNetworkRx()+user.getNetworkTx())/1000, 1, 2)}"></span><span> GB</span>
+                    </th:block>
+                </td>
                 <td>
                     <button th:attr="data-id=${user.id}" class="btn btn-primary btn-xs editBtn"><span
                             class="glyphicon glyphicon-pencil"></span> 编辑
@@ -65,7 +75,7 @@
                 <td>
                     <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
                        th:if="${user.containerStatus=='exited'}"
-                       th:href="'/startContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
+                       th:href="'/startContainer?id='+${user.containerId}+'&role=admin&page='+${currentPage}"
                        class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-play"></span> 启动</a>
                     <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
                        th:if="${user.containerStatus=='created'}"
@@ -107,7 +117,7 @@
     <!-- Modal -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
-            <form th:action="@{/save}" method="post">
+            <form th:action="@{/save}" method="post" th:object="${user}">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
@@ -120,7 +130,8 @@
                         <input type="hidden" id="containerId" name="containerId">
                         <input type="hidden" id="containerPort" name="containerPort">
                         <input type="hidden" id="containerStatus" name="containerStatus">
-
+                        <input type="hidden" id="networkTx" name="networkTx">
+                        <input type="hidden" id="networkRx" name="networkRx">
                         <div class="form-group">
                             <label for="wechatName">微信账号</label>
                             <input autocomplete="off" type="text" id="wechatName" name="wechatName"
@@ -129,12 +140,6 @@
                         <div class="form-group">
                             <label for="nickname">昵称</label>
                             <input autocomplete="off" type="text" id="nickname" name="nickname" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="containerLocation">服务区</label>
-                            <select id="containerLocation" name="containerLocation" class="form-control">
-                                <option th:each="location,it:${locations}" th:text="${location}" th:value="${location}">区域列表</option>
-                            </select>
                         </div>
                         <div class="form-group">
                             <label for="startTime">开始日期</label>
@@ -160,23 +165,22 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label for="enableSelfControlOui">自主控制</label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="enableSelfControl" id="enableSelfControlOui" value="true">
+                                    是
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="enableSelfControl" id="enableSelfControlNon" value="false">否
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label for="icon">超级图标</label>
-                            <!--                            <div class="checkbox">
-                                    <label>
-                                        <input name="icon" value="fas fa-star" type="checkbox"> <i style="color: #f0ad4e;" class="fas fa-star"></i>
-                                    </label>
-                                </div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input name="icon" value="fas fa-moon" type="checkbox"> <i style="color: #f0ad4e;" class="fas fa-moon"></i>
-                                    </label>
-                                </div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input name="icon" value="fas fa-sun" type="checkbox"> <i style="color: #f0ad4e;" class="fas fa-sun"></i>
-                                    </label>
-                                </div>-->
-                            <input autocomplete="off" value='<i style="color:#f0ad4e;" class="fas fa-star"></i>'
+                            <input autocomplete="off" value='<span class="label label-primary">Beta</span>'
                                    type="text" id="icon" name="icon" class="form-control">
                         </div>
                     </div>
@@ -189,15 +193,17 @@
         </div>
     </div>
 </div>
-<script src="//cdn.jsdelivr.net/webjars/jquery/3.1.1/jquery.min.js"></script>
-<script src="//cdn.jsdelivr.net/webjars/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-<script src="/webjars/moment/2.19.3/min/moment-with-locales.min.js"></script>
-<script src="/js/bootstrap-datetimepicker.min.js"></script>
-</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 <script src="/js/app.js"></script>
 <script>
-    $('.date').datetimepicker({
-        format: 'YYYY-MM-DD'
+    $(document).ready(function () {
+        $('.date').datetimepicker({
+            format: 'YYYY-MM-DD'
+        });
     });
 </script>
+</body>
 </html>

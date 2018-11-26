@@ -1,0 +1,33 @@
+eureka:
+    client:
+        serviceUrl:
+            defaultZone: http://localhost:8761/eureka/
+      instance:
+        ip-address:
+        prefer-ip-address: true
+        instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
+server:
+    port: 8899
+spring:
+    application:
+        name: nasi-mie
+    datasource:
+        driver-class-name: com.mysql.jdbc.Driver
+        hikari:
+            connection-init-sql: SET NAMES utf8mb4
+        password: ''
+        url: jdbc:mysql://127.0.0.1:3306/ssr??autoReconnect=true&useUnicode=true&characterEncoding=utf-8
+        username: root
+    jackson:
+        date-format: yyyy-MM-dd
+        time-zone: GMT+2
+    jpa:
+        hibernate:
+            ddl-auto: update
+            naming:
+                physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    mvc:
+        favicon:
+            enabled: true
+    thymeleaf:
+        cache: true

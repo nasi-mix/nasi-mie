@@ -12,27 +12,34 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    /* 微信id*/
     private String wechatName;
-
+    /*开始时间*/
     private Date startTime;
-
+    /*结束时间*/
     private Date endTime;
-
+    /*用户是否激活*/
     private boolean isEnable;
+    /*二维码*/
+    private String qrCode;
+    /*容器id*/
+    private String containerId;
+    /*容器状态*/
+    private String containerStatus;
+    /*容器端口*/
+    private String containerPort;
+    /*图标*/
+    private String icon;
+    /*显示名称*/
+    private String nickname;
+    /*网络发出量*/
+    private double networkTx;
+    /*网络接收量*/
+    private double networkRx;
+
+    private boolean enableSelfControl;
 
     private String containerLocation;
-
-    private String qrCode;
-
-    private String containerId;
-
-    private String containerStatus;
-
-    private String containerPort;
-
-    private String icon;
-
-    private String nickname;
 
     public User() {
 
@@ -126,29 +133,51 @@ public class User {
         this.containerPort = containerPort;
     }
 
+    public double getNetworkTx() {
+        return networkTx;
+    }
+
+    public void setNetworkTx(double networkTx) {
+        this.networkTx = networkTx;
+    }
+
+    public double getNetworkRx() {
+        return networkRx;
+    }
+
+    public void setNetworkRx(double networkRx) {
+        this.networkRx = networkRx;
+    }
+
+    public boolean isEnableSelfControl() {
+        return enableSelfControl;
+    }
+
+    public void setEnableSelfControl(boolean enableSelfControl) {
+        this.enableSelfControl = enableSelfControl;
+    }
+
+    public User(String wechatName, Date startTime, Date endTime, boolean isEnable, String qrCode, String containerId, String containerStatus, String containerPort, String icon, String nickname, double networkTx, double networkRx, boolean enableSelfControl) {
+        this.wechatName = wechatName;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.isEnable = isEnable;
+        this.qrCode = qrCode;
+        this.containerId = containerId;
+        this.containerStatus = containerStatus;
+        this.containerPort = containerPort;
+        this.icon = icon;
+        this.nickname = nickname;
+        this.networkTx = networkTx;
+        this.networkRx = networkRx;
+        this.enableSelfControl = enableSelfControl;
+    }
+
     public String getContainerLocation() {
         return containerLocation;
     }
 
     public void setContainerLocation(String containerLocation) {
         this.containerLocation = containerLocation;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", wechatName='" + wechatName + '\'' +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", isEnable=" + isEnable +
-                ", containerLocation='" + containerLocation + '\'' +
-                ", qrCode='" + qrCode + '\'' +
-                ", containerId='" + containerId + '\'' +
-                ", containerStatus='" + containerStatus + '\'' +
-                ", containerPort='" + containerPort + '\'' +
-                ", icon='" + icon + '\'' +
-                ", nickname='" + nickname + '\'' +
-                '}';
     }
 }

@@ -2,23 +2,23 @@ package me.qfdk.nasimie.controler;
 
 import me.qfdk.nasimie.entity.User;
 import me.qfdk.nasimie.repository.UserRepository;
-import net.glxn.qrgen.QRCode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/user")
-public class UserControler {
+public class UserController {
 
     @Autowired
     UserRepository userRepository;
 
     @GetMapping("/")
     public String index() {
-        return "index";
+        return "redirect:/";
     }
 
     @GetMapping("/findUserByWechatName")
@@ -33,14 +33,4 @@ public class UserControler {
         }
         return "user";
     }
-
-    @RequestMapping(value = "/qrCode", method = RequestMethod.GET)
-    public HttpEntity<byte[]> qr(@RequestParam("str")  String qrCode) {
-        byte[] bytes = QRCode.from("ssr://" + qrCode).withSize(250, 250).stream().toByteArray();
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_PNG);
-        headers.setContentLength(bytes.length);
-        return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.CREATED);
-    }
-
 }

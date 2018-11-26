@@ -3,7 +3,7 @@ package me.qfdk.nasimie.controler;
 import com.spotify.docker.client.exceptions.DockerException;
 import me.qfdk.nasimie.entity.User;
 import me.qfdk.nasimie.repository.UserRepository;
-import me.qfdk.nasimie.tools.Outil;
+import me.qfdk.nasimie.tools.Tools;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -88,7 +88,7 @@ public class AdminUserControler {
             user.setContainerId(info.get("containerId"));
             user.setContainerStatus(info.get("status"));
             user.setContainerPort(info.get("port"));
-            user.setQrCode(Outil.getSSRUrl(host, info.get("port"), info.get("pass"),user.getContainerLocation()));
+            user.setQrCode(Tools.getSSRUrl(host, info.get("port"), info.get("pass"),user.getContainerLocation()));
         }
         userRepository.save(user);
         return "redirect:/admin?page=" + this.currentPage;
