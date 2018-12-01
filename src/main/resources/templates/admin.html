@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta http-equiv="refresh" content="30">
     <title>NASI 管理面板</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
@@ -25,6 +24,7 @@
                 <th>No.</th>
                 <th>微信账号</th>
                 <th>昵称</th>
+                <th>服务区</th>
                 <th>结束日期</th>
                 <th>付款状态</th>
                 <th>自主控制</th>
@@ -44,6 +44,7 @@
                     <span th:text="${user.wechatName}"></span>
                 </td>
                 <td th:text="${user.nickname}"></td>
+                <td th:text="${user.containerLocation}"></td>
                 <td th:text="${#dates.format(user.endTime, 'yyyy-MM-dd')}"></td>
                 <td th:utext="${user.isEnable}?'<span class=\'label label-success btn-xs\'>已付款</span>':'<span class=\'label label-danger btn-xs\'>未付款</span>'"></td>
                 <td th:utext="${user.isEnableSelfControl()}?'<span class=\'label label-primary btn-xs\'>自主控制</span>':'<span class=\'label label-warning btn-xs\'>未达到要求</span>'"></td>
@@ -75,23 +76,23 @@
                 <td>
                     <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
                        th:if="${user.containerStatus=='exited'}"
-                       th:href="'/startContainer?id='+${user.containerId}+'&role=admin&page='+${currentPage}"
+                       th:href="'/startContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
                        class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-play"></span> 启动</a>
                     <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
                        th:if="${user.containerStatus=='created'}"
-                       th:href="'/startContainer?id='+${user.containerId}+'&role=admin&page='+${currentPage}"
+                       th:href="'/startContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
                        class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-play"></span> 开始服务</a>
                     <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
                        th:if="${user.containerStatus=='running'}"
-                       th:href="'/stopContainer?id='+${user.containerId}+'&role=admin&page='+${currentPage}"
+                       th:href="'/stopContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
                        class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-off"></span> 停止</a>
                     <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
                        th:if="${user.containerStatus=='running'}"
-                       th:href="'/restartContainer?id='+${user.containerId}+'&role=admin&page='+${currentPage}"
+                       th:href="'/restartContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
                        class="btn btn-warning btn-xs"><span class="glyphicon glyphicon-refresh"></span> 重启</a>
                     <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
                        th:if="${!#strings.isEmpty(user.containerId)}"
-                       th:href="'/deleteContainer?id='+${user.containerId}+'&role=admin&page='+${currentPage}"
+                       th:href="'/deleteContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
                        class="btn btn-default btn-xs"><span class="glyphicon glyphicon-trash"></span> 清空容器</a>
                 </td>
             </tr>
@@ -140,6 +141,12 @@
                         <div class="form-group">
                             <label for="nickname">昵称</label>
                             <input autocomplete="off" type="text" id="nickname" name="nickname" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="containerLocation">服务区</label>
+                            <select id="containerLocation" name="containerLocation" class="form-control">
+                                <option th:each="location,it:${locations}" th:text="${location}" th:value="${location}">区域列表</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="startTime">开始日期</label>

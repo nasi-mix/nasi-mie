@@ -17,6 +17,7 @@ $(document).ready(function () {
                 $('#networkTx').val(data.networkTx);
                 $('#wechatName').val(data.wechatName);
                 $('#nickname').val(data.nickname);
+                $('#containerLocation').val(data.containerLocation);
                 $('#icon').val(data.icon);
                 $('#startTime').val(data.startTime);
                 $('#endTime').val(data.endTime);
@@ -37,6 +38,7 @@ $(document).ready(function () {
             $('#startTime').val('');
             $('#endTime').val('');
             $('#nickname').val('');
+            $('#containerLocation').val('');
             $('#isEnableOui').prop('checked', false);
             $('#isEnableNon').prop('checked', false);
             $('#enableSelfControlOui').prop('checked', false);

@@ -1,3 +1,29 @@
+eureka:
+    client:
+        serviceUrl:
+            defaultZone: http://localhost:8761/eureka/
+server:
+    port: 8899
 spring:
-    profiles:
-        active: prod
+    application:
+        name: nasi-mie
+    datasource:
+        driver-class-name: com.mysql.jdbc.Driver
+        hikari:
+            connection-init-sql: SET NAMES utf8mb4
+        password: ''
+        url: jdbc:mysql://127.0.0.1:3306/ssr??autoReconnect=true&useUnicode=true&characterEncoding=utf-8
+        username: root
+    jackson:
+        date-format: yyyy-MM-dd
+        time-zone: GMT+2
+    jpa:
+        hibernate:
+            ddl-auto: update
+            naming:
+                physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    mvc:
+        favicon:
+            enabled: true
+    thymeleaf:
+        cache: true

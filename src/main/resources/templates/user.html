@@ -49,11 +49,11 @@
         </div>
         <div class="form-inline col-md-10 col-md-offset-2" style="font-size: 1.2em;">
             <div class="form-group col-md-5">
-                <label class="control-label" for="startTime">开始时间：</label>
-
-                <p class="form-control-static" id="startTime"
-                   th:text="${#dates.format(user.startTime, 'yyyy-MM-dd')}"></p>
-
+                <!--<label class="control-label" for="startTime">开始时间：</label>-->
+                <!--<p class="form-control-static" id="startTime"-->
+                   <!--th:text="${#dates.format(user.startTime, 'yyyy-MM-dd')}"></p>-->
+                <label class="control-label" for="containerLocation">服务区域：</label>
+                <p class="form-control-static" id="containerLocation" th:text="${user.containerLocation}"></p>
             </div>
             <div class="form-group col-md-5">
                 <label class="control-label" for="endTime">结束时间：</label>
@@ -63,31 +63,6 @@
 
             </div>
         </div>
-
-        <!--<div class="form-inline col-md-10 col-md-offset-2" style="font-size: 1.2em;">-->
-            <!--<div class="form-group col-md-5">-->
-                <!--<label class="control-label" for="networkTx">发出流量：</label>-->
-                <!--<th:block th:if="${user.getNetworkTx() < 1024}">-->
-                    <!--<span id="networkTx" class="form-control-static" th:text="${#numbers.formatDecimal(user.getNetworkTx(), 1, 2)}"></span>-->
-                    <!--<span> MB</span>-->
-                <!--</th:block>-->
-                <!--<th:block th:if="${user.getNetworkTx() >= 1000}">-->
-                    <!--<span id="networkTx" class="form-control-static" th:text="${#numbers.formatDecimal(user.getNetworkTx()/1000, 1, 2)}"></span>-->
-                    <!--<span> GB</span>-->
-                <!--</th:block>-->
-            <!--</div>-->
-            <!--<div class="form-group col-md-5">-->
-                <!--<label class="control-label" for="networkRx">接收流量：</label>-->
-                <!--<th:block th:if="${user.getNetworkRx() < 1000}">-->
-                    <!--<span id="networkRx" class="form-control-static" th:text="${#numbers.formatDecimal(user.getNetworkRx(), 1, 2)}"></span>-->
-                    <!--<span> MB</span>-->
-                <!--</th:block>-->
-                <!--<th:block th:if="${user.getNetworkRx() >= 1000}">-->
-                    <!--<span id="networkRx" class="form-control-static" th:text="${#numbers.formatDecimal(user.getNetworkRx()/1000, 1, 2)}"></span>-->
-                    <!--<span> GB</span>-->
-                <!--</th:block>-->
-            <!--</div>-->
-        <!--</div>-->
 
         <div class="form-inline col-md-10 col-md-offset-2" style="font-size: 1.2em;">
             <div class="form-group col-md-5">
