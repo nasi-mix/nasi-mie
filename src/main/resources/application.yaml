@@ -1,9 +1,10 @@
 eureka:
     client:
         serviceUrl:
-            defaultZone: http://localhost:8761/eureka/
+            defaultZone: http://nasi:eureka@cdn.qfdk.me:8761/eureka/
 server:
     port: 8899
+    schedules: 0 0/30 * * * ?
 spring:
     application:
         name: nasi-mie
@@ -11,9 +12,9 @@ spring:
         driver-class-name: com.mysql.jdbc.Driver
         hikari:
             connection-init-sql: SET NAMES utf8mb4
-        password: ''
-        url: jdbc:mysql://127.0.0.1:3306/ssr??autoReconnect=true&useUnicode=true&characterEncoding=utf-8
+        url: jdbc:mysql://127.0.0.1:3306/nasi?autoReconnect=true&useUnicode=true&characterEncoding=utf-8
         username: root
+        password: root
     jackson:
         date-format: yyyy-MM-dd
         time-zone: GMT+2
@@ -26,4 +27,4 @@ spring:
         favicon:
             enabled: true
     thymeleaf:
-        cache: true
+        cache: false

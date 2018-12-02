@@ -5,6 +5,8 @@ import me.qfdk.nasimie.entity.User;
 import me.qfdk.nasimie.repository.UserRepository;
 import me.qfdk.nasimie.tools.Tools;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -30,15 +32,14 @@ import java.util.Map;
 @Controller()
 public class AdminUserControler {
     @Autowired
+    RestTemplate restTemplate;
+    @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private DiscoveryClient client;
-
-    @Autowired
-    RestTemplate restTemplate;
-
     private int currentPage;
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @InitBinder
     protected void initBinder(WebDataBinder binder) {
@@ -88,7 +89,7 @@ public class AdminUserControler {
             user.setContainerId(info.get("containerId"));
             user.setContainerStatus(info.get("status"));
             user.setContainerPort(info.get("port"));
-            user.setQrCode(Tools.getSSRUrl(host, info.get("port"), info.get("pass"),user.getContainerLocation()));
+            user.setQrCode(Tools.getSSRUrl(host, info.get("port"), info.get("pass"), user.getContainerLocation()));
         }
         userRepository.save(user);
         return "redirect:/admin?page=" + this.currentPage;
@@ -176,5 +177,15 @@ public class AdminUserControler {
             }
         }
         return available_Services;
+    }
+
+    @GetMapping("/refreshNetwork")
+    public String refreshNetwork() {
+        List<User> listUsers = userRepository.findAll();
+        listUsers.stream().forEach(user -> {
+            Tools.refreshUserNetwork(user, userRepository, restTemplate, logger);
+        });
+        logger.info("-----------------------------------------");
+        return "redirect:/admin?page=" + this.currentPage;
     }
 }

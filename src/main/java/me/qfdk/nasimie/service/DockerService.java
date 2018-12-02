@@ -130,8 +130,4 @@ public class DockerService {
             }
         }
     }
-
-    public ContainerStats getContainerState(String containerId) throws DockerException, InterruptedException {
-        return docker.stats(containerId);
-    }
 }
