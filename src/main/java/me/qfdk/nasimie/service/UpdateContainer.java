@@ -6,17 +6,15 @@ import me.qfdk.nasimie.tools.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
-@Component
+@Service
 @EnableScheduling
-@EnableAsync
 public class UpdateContainer {
     @Autowired
     private UserRepository userRepository;
@@ -24,13 +22,16 @@ public class UpdateContainer {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private Tools tools;
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Scheduled(cron = "${server.schedules}")
     public void refreshNetwork() {
         List<User> listUsers = userRepository.findAll();
         for (User user : listUsers) {
-            Tools.refreshUserNetwork(user, userRepository, restTemplate, logger);
+            tools.refreshUserNetwork(user, userRepository, restTemplate, logger);
         }
         logger.info("-----------------------------------------");
     }

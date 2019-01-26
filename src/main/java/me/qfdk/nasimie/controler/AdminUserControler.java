@@ -33,10 +33,16 @@ import java.util.Map;
 public class AdminUserControler {
     @Autowired
     RestTemplate restTemplate;
+
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private DiscoveryClient client;
+
+    @Autowired
+    private Tools tools;
+
     private int currentPage;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -183,7 +189,7 @@ public class AdminUserControler {
     public String refreshNetwork() {
         List<User> listUsers = userRepository.findAll();
         listUsers.stream().forEach(user -> {
-            Tools.refreshUserNetwork(user, userRepository, restTemplate, logger);
+            tools.refreshUserNetwork(user, userRepository, restTemplate, logger);
         });
         logger.info("-----------------------------------------");
         return "redirect:/admin?page=" + this.currentPage;
