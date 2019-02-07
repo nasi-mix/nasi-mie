@@ -16,6 +16,6 @@ public class Api {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_PNG);
         headers.setContentLength(bytes.length);
-        return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.CREATED);
+        return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
     }
 }

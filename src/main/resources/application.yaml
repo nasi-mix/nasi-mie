@@ -12,7 +12,7 @@ spring:
         driver-class-name: com.mysql.jdbc.Driver
         hikari:
             connection-init-sql: SET NAMES utf8mb4
-        url: jdbc:mysql://127.0.0.1:3306/nasi?autoReconnect=true&useUnicode=true&characterEncoding=utf-8
+        url: jdbc:mysql://127.0.0.1:3306/ssr?autoReconnect=true&useUnicode=true&characterEncoding=utf-8
         username: root
         password: root
     jackson:
