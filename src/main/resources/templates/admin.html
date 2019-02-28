@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:color="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>NASI-Boss 管理面板</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css"
+          integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 </head>
 <body>
@@ -30,9 +32,8 @@
                 <th>自主控制</th>
                 <th>使用流量</th>
                 <th>用户操作</th>
-                <th>服务状态</th>
-                <th>运行端口</th>
                 <th>服务器操作</th>
+                <th>运行端口</th>
             </tr>
             </thead>
             <tbody>
@@ -50,10 +51,12 @@
                 <td th:utext="${user.isEnableSelfControl()}?'<span class=\'label label-primary btn-xs\'>自主控制</span>':'<span class=\'label label-warning btn-xs\'>未达到要求</span>'"></td>
                 <td>
                     <th:block th:if="${user.getNetworkRx()+user.getNetworkTx()<1000}">
-                        <span id="networkTraffic" class="form-control-static" th:text="${#numbers.formatDecimal(user.getNetworkRx()+user.getNetworkTx(), 1, 2)}"></span><span> MB</span>
+                        <span id="networkTraffic" class="form-control-static"
+                              th:text="${#numbers.formatDecimal(user.getNetworkRx()+user.getNetworkTx(), 1, 2)}"></span><span> MB</span>
                     </th:block>
                     <th:block th:if="${user.getNetworkRx()+user.getNetworkTx()>=1000}">
-                        <span id="networkTraffic" class="form-control-static" th:text="${#numbers.formatDecimal((user.getNetworkRx()+user.getNetworkTx())/1000, 1, 2)}"></span><span> GB</span>
+                        <span id="networkTraffic" class="form-control-static"
+                              th:text="${#numbers.formatDecimal((user.getNetworkRx()+user.getNetworkTx())/1000, 1, 2)}"></span><span> GB</span>
                     </th:block>
                 </td>
                 <td>
@@ -66,34 +69,55 @@
                 </td>
 
                 <td>
-                    <span th:if="${user.containerStatus=='running'}" class="label label-success btn-xs">正在运行</span>
-                    <span th:if="${user.containerStatus=='created'}" class="label label-warning btn-xs">等待</span>
-                    <span th:if="${user.containerStatus=='exited'}" class="label label-danger btn-xs">停止</span>
+                    <div class="btn-group">
+                        <button class="btn btn-xs dropdown-toggle"
+                                type="button" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false"
+                                th:classappend="${user.containerStatus=='running'}?'label-success':'label-danger'"
+                                >
+                            <span style="color:white;" th:if="${user.containerStatus=='running'}">正在运行</span>
+                            <span style="color:white;" th:if="${user.containerStatus=='created'}">等待</span>
+                            <span style="color:white;" th:if="${user.containerStatus=='exited'}">停止</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
+                                   th:if="${user.containerStatus=='exited'}"
+                                   th:href="'/startContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
+                                ><span class="glyphicon glyphicon-play"></span> 启动</a>
+                            </li>
+                            <li>
+                                <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
+                                   th:if="${user.containerStatus=='created'}"
+                                   th:href="'/startContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
+                                ><span class="glyphicon glyphicon-play"></span>
+                                    开始服务</a>
+                            </li>
+                            <li>
+                                <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
+                                   th:if="${user.containerStatus=='running'}"
+                                   th:href="'/stopContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
+                                ><span class="glyphicon glyphicon-off"></span> 停止</a>
+                            </li>
+                            <li>
+                                <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
+                                   th:if="${user.containerStatus=='running'}"
+                                   th:href="'/restartContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
+                                ><span class="glyphicon glyphicon-refresh"></span>
+                                    重启</a>
+                            </li>
+                            <li>
+                                <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
+                                   th:if="${!#strings.isEmpty(user.containerId)}"
+                                   th:href="'/deleteContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
+                                ><span class="glyphicon glyphicon-trash"></span>
+                                    清空容器</a>
+                            </li>
+                        </ul>
+                    </div>
                 </td>
                 <td>
                     <span th:text="${user.containerPort}"></span>
-                </td>
-                <td>
-                    <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
-                       th:if="${user.containerStatus=='exited'}"
-                       th:href="'/startContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
-                       class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-play"></span> 启动</a>
-                    <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
-                       th:if="${user.containerStatus=='created'}"
-                       th:href="'/startContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
-                       class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-play"></span> 开始服务</a>
-                    <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
-                       th:if="${user.containerStatus=='running'}"
-                       th:href="'/stopContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
-                       class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-off"></span> 停止</a>
-                    <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
-                       th:if="${user.containerStatus=='running'}"
-                       th:href="'/restartContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
-                       class="btn btn-warning btn-xs"><span class="glyphicon glyphicon-refresh"></span> 重启</a>
-                    <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
-                       th:if="${!#strings.isEmpty(user.containerId)}"
-                       th:href="'/deleteContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
-                       class="btn btn-default btn-xs"><span class="glyphicon glyphicon-trash"></span> 清空容器</a>
                 </td>
             </tr>
             </tbody>
@@ -145,7 +169,9 @@
                         <div class="form-group">
                             <label for="containerLocation">服务区</label>
                             <select id="containerLocation" name="containerLocation" class="form-control">
-                                <option th:each="location,it:${locations}" th:text="${location}" th:value="${location}">区域列表</option>
+                                <option th:each="location,it:${locations}" th:text="${location}" th:value="${location}">
+                                    区域列表
+                                </option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -181,7 +207,8 @@
                             </div>
                             <div class="radio">
                                 <label>
-                                    <input type="radio" name="enableSelfControl" id="enableSelfControlNon" value="false">否
+                                    <input type="radio" name="enableSelfControl" id="enableSelfControlNon"
+                                           value="false">否
                                 </label>
                             </div>
                         </div>
