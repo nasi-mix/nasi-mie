@@ -82,6 +82,8 @@ public class AdminUserControler {
         model.addAttribute("locations", getLocations());
         model.addAttribute("users", userRepository.findAll(PageRequest.of(page, 10)));
         model.addAttribute("currentPage", page);
+        model.addAttribute("paidUsersCount", userRepository.findUserByIconNotLike("%label-warning%").size());
+        model.addAttribute("totalUsersCount", userRepository.findAll().size());
         this.currentPage = page;
         return "admin";
     }
