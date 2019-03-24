@@ -79,7 +79,8 @@
                 <td>
                     <div th:if="${!#strings.isEmpty(user.icon)}" th:utext="${user.icon}" th:remove="tag">
                     </div>
-                    <span th:text="${user.wechatName}"></span>
+                    <a th:href="'/user/findUserByWechatName?wechatName='+${user.wechatName}"
+                       th:text="${user.wechatName}"></a>
                 </td>
                 <td th:text="${user.nickname}"></td>
                 <td th:text="${user.containerLocation}"></td>
