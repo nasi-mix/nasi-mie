@@ -116,6 +116,11 @@
 
         </div>
         <input type="hidden" th:value="${user.getContainerId()}" id="containerId">
+        <div class="alert alert-info">
+            <p><b>请点击以下链接，自动添加服务器 : </b></p>
+            <a style="word-wrap: break-word;" th:href="@{ssr://__${user.getQrCode()}__}"
+               th:text="@{ssr://__${user.getQrCode()}__}"></a>
+        </div>
         <div class="col-md-12">
             <hr>
             <div class="panel panel-primary">
