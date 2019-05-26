@@ -174,11 +174,11 @@ public class AdminUserControler {
         return userRepository.findById(id).get();
     }
 
-    public List<String> getLocations() {
+    private List<String> getLocations() {
         List<String> services = client.getServices();
         List<String> available_Services = new ArrayList<>();
         for (String service : services) {
-            if (service.indexOf("campur") != -1) {
+            if (service.contains("campur")) {
                 available_Services.add(service);
             }
         }
