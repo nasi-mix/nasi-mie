@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
@@ -24,10 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller()
 public class AdminUserControler {
@@ -54,7 +52,16 @@ public class AdminUserControler {
     }
 
     @GetMapping("/")
-    public String index() {
+    public String index(Model model) {
+//        model.addAttribute("locations", getLocations());
+        Map<String, String> map = new HashMap<>();
+        for (String location : getLocations()) {
+            for (ServiceInstance instance : client.getInstances(location)) {
+                map.put(location, instance.getHost());
+            }
+        }
+        model.addAttribute("locationMap", map);
+
         return "index";
     }
 

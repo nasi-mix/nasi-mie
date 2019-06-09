@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>小伙伴科学上网 - LE MONDE</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css"/>
     <!--<link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">    -->
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 </head>
@@ -15,7 +15,7 @@
     <div>
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist" id="myTabs">
-            <li role="presentation" class="active"><a href="/" >信息查询</a></li>
+            <li role="presentation" class="active"><a href="/">信息查询</a></li>
             <li role="presentation"><a href="/help">使用帮助</a></li>
         </ul>
         <!-- Tab panes -->
@@ -37,7 +37,44 @@
         </div>
     </div>
 
-</div>
+    <div class="panel panel-default" style="margin-top: 10px;">
+        <!-- Default panel contents -->
+        <div class="panel-heading">区域延时测试</div>
 
+        <!-- Table -->
+        <table class="table">
+            <thead>
+            <tr>
+                <th>location</th>
+                <th>往返延时</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="location,it:${locationMap}">
+                <td th:text="${location.key}">location</td>
+                <td th:id="${location.key}" th:attr="data-ip=${location.value},data-location=${location.key}">- ms</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/ping.js"></script>
+<script>
+    $(document).ready(async function () {
+        $ips = $('td[data-ip]');
+        for (var i = 0; i < $ips.length; i++) {
+            var locationServer = $ips.eq(i).attr('data-location');
+            var ip = $ips.eq(i).attr('data-ip');
+            await ping('http://' + ip + ':8762').then(function (delta) {
+                console.log('Ping time was ' + String(delta) + ' ms');
+                $("td[data-ip='" + ip + "']").text(String(delta) + ' ms');
+            }).catch(function (err) {
+                console.error('Could not ping remote URL', err);
+            });
+        }
+    });
+</script>
 </body>
 </html>
