@@ -58,6 +58,7 @@ public class ContainerService {
 
     @Scheduled(cron = "${server.schedules}")
     public void refreshNetwork() {
+        logger.info("-------------自动定时任务-------------------");
         List<User> listUsers = userRepository.findAll();
         for (User user : listUsers) {
             refreshUserNetwork(user, restTemplate, logger);

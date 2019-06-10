@@ -244,12 +244,14 @@ public class AdminUserControler {
                 logger.warn("[User][STOP](OK)(" + user.getWechatName() + ") container was [stopped] :" + containerId);
             } catch (Exception e) {
                 logger.error("[STOP](KO)-> " + containerId + ": container not found！");
+                logger.error(e.getMessage());
             }
             try {
                 deleteContainerByContainerId(user.getContainerId(), false);
                 logger.warn("[User][DEL](OK)(" + user.getWechatName() + ") container was [deleted] :" + containerId);
             } catch (Exception e) {
                 logger.error("[DEL](KO)-> " + containerId + ": container not found！");
+                logger.error(e.getMessage());
             }
 
         });
