@@ -14,26 +14,26 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @Service
-@EnableScheduling
+//@EnableScheduling
 public class UpdateContainer {
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
-    private Tools tools;
-
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    @Scheduled(cron = "${server.schedules}")
-    public void refreshNetwork() {
-        List<User> listUsers = userRepository.findAll();
-        for (User user : listUsers) {
-            tools.refreshUserNetwork(user, userRepository, restTemplate, logger);
-        }
-        logger.info("-----------------------------------------");
-    }
+//    @Autowired
+//    private UserRepository userRepository;
+//
+//    @Autowired
+//    private RestTemplate restTemplate;
+//
+//    @Autowired
+//    private ContainerService containerService;
+//
+//    private Logger logger = LoggerFactory.getLogger(this.getClass());
+//
+//    @Scheduled(cron = "${server.schedules}")
+//    public void refreshNetwork() {
+//        List<User> listUsers = userRepository.findAll();
+//        for (User user : listUsers) {
+//            containerService.refreshUserNetwork(user, userRepository, restTemplate, logger);
+//        }
+//        logger.info("-----------------------------------------");
+//    }
 
 }

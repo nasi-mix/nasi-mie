@@ -3,6 +3,9 @@ package me.qfdk.nasimie.tools;
 import me.qfdk.nasimie.entity.User;
 import me.qfdk.nasimie.repository.UserRepository;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -13,6 +16,7 @@ import java.util.Map;
 
 @Component
 public class Tools {
+
     public static String getSSRUrl(String host, String port, String password, String remark) throws UnsupportedEncodingException {
         String pass = new String(Base64.getEncoder().encode(password.getBytes("UTF-8"))).replace("=", "");
         //ssr://base64(host:port:protocol:method:obfs:base64pass
@@ -21,19 +25,12 @@ public class Tools {
         return new String(Base64.getEncoder().encode(tmp.getBytes())).replace("=", "");
     }
 
-    @Async
-    public void refreshUserNetwork(User user, UserRepository userRepository, RestTemplate restTemplate, Logger logger) {
-        try {
-            Map<String, Double> traffic = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/getNetworkStats?id=" + user.getContainerId(), Map.class).getBody();
-            user.setNetworkTx(traffic.get("txBytes"));
-            user.setNetworkRx(traffic.get("rxBytes"));
-            userRepository.save(user);
-            logger.info("[Network Traffic](OK)-> " + user.getWechatName());
-        } catch (Exception e) {
-            logger.error("[Network Traffic](KO)-> " + user.getWechatName());
-            user.setNetworkTx(0.0);
-            user.setNetworkRx(0.0);
-            userRepository.save(user);
-        }
+    public static void updateInfo(DiscoveryClient client, User user, Map<String, String> info) throws UnsupportedEncodingException {
+        String host = client.getInstances(user.getContainerLocation()).get(0).getHost();
+        user.setContainerId(info.get("containerId"));
+        user.setContainerStatus(info.get("status"));
+        user.setContainerPort(info.get("port"));
+        user.setQrCode(Tools.getSSRUrl(host, info.get("port"), info.get("pass"), user.getContainerLocation()));
     }
+
 }

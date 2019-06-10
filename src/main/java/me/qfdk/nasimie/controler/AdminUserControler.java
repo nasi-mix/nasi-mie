@@ -3,6 +3,7 @@ package me.qfdk.nasimie.controler;
 import com.spotify.docker.client.exceptions.DockerException;
 import me.qfdk.nasimie.entity.User;
 import me.qfdk.nasimie.repository.UserRepository;
+import me.qfdk.nasimie.service.ContainerService;
 import me.qfdk.nasimie.tools.Tools;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -23,7 +24,6 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -39,7 +39,7 @@ public class AdminUserControler {
     private DiscoveryClient client;
 
     @Autowired
-    private Tools tools;
+    private ContainerService containerService;
 
     private int currentPage;
 
@@ -98,10 +98,10 @@ public class AdminUserControler {
     public String save(User user) {
         // 新用户
         if (user.getId() == null || StringUtils.isEmpty(user.getContainerId())) {
-            System.err.println("[新建容器]-> " + user.getWechatName());
+            logger.info("[新建容器]-> " + user.getWechatName());
             try {
                 Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName(), Map.class).getBody();
-                updateInfo(user, info);
+                Tools.updateInfo(client, user, info);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -110,14 +110,14 @@ public class AdminUserControler {
             //检查是否换机房
             User oldUser = userRepository.findById(user.getId()).get();
             if (!oldUser.getContainerLocation().equals(user.getContainerLocation())) {
-                System.err.println("[换机房] [" + user.getWechatName() + "] " + oldUser.getContainerLocation() + " --> " + user.getContainerLocation());
+                logger.info("[换机房] [" + user.getWechatName() + "] " + oldUser.getContainerLocation() + " --> " + user.getContainerLocation());
 
                 try {
                     // 建立新容器
                     Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName() + "&port=" + oldUser.getContainerPort(), Map.class).getBody();
-                    updateInfo(user, info);
+                    Tools.updateInfo(client, user, info);
                     // 删除旧容器
-                    deleteContainerById(oldUser.getContainerId());
+                    deleteContainerByContainerId(oldUser.getContainerId(), true);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -127,29 +127,23 @@ public class AdminUserControler {
         return "redirect:/admin?page=" + this.currentPage;
     }
 
-    private void updateInfo(User user, Map<String, String> info) throws UnsupportedEncodingException {
-        String host = client.getInstances(user.getContainerLocation()).get(0).getHost();
-        user.setContainerId(info.get("containerId"));
-        user.setContainerStatus(info.get("status"));
-        user.setContainerPort(info.get("port"));
-        user.setQrCode(Tools.getSSRUrl(host, info.get("port"), info.get("pass"), user.getContainerLocation()));
-    }
 
-
-    private void deleteContainerById(String containerId) {
+    private void deleteContainerByContainerId(String containerId, Boolean deleteContainerLocation) {
         User user = userRepository.findByContainerId(containerId);
         restTemplate.getForEntity("http://" + user.getContainerLocation() + "/deleteContainer?id=" + containerId, Integer.class);
         user.setContainerStatus("");
         user.setContainerId("");
-        user.setContainerPort("");
-        user.setContainerLocation("");
+        if (deleteContainerLocation) {
+            user.setContainerPort("");
+            user.setContainerLocation("");
+        }
         user.setQrCode("");
         userRepository.save(user);
     }
 
     @GetMapping("/deleteContainer")
     public String deleteContainer(@RequestParam("id") String containerId, @RequestParam("role") String role) throws DockerException, InterruptedException {
-        deleteContainerById(containerId);
+        deleteContainerByContainerId(containerId, true);
         if (role.equals("admin")) {
             return "redirect:/admin?page=" + this.currentPage;
         }
@@ -171,7 +165,6 @@ public class AdminUserControler {
     @GetMapping("/restartContainer")
     public String restartContainer(@RequestParam("id") String containerId, @RequestParam("role") String role) {
         User user = userRepository.findByContainerId(containerId);
-
         String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/restartContainer?id=" + containerId, String.class).getBody();
         user.setContainerStatus(status);
         userRepository.save(user);
@@ -183,14 +176,18 @@ public class AdminUserControler {
 
     @GetMapping("/stopContainer")
     public String stopContainer(@RequestParam("id") String containerId, @RequestParam("role") String role) {
-        User user = userRepository.findByContainerId(containerId);
-        String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/stopContainer?id=" + containerId, String.class).getBody();
-        user.setContainerStatus(status);
-        userRepository.save(user);
+        stopContainerByContainerId(containerId);
         if (role.equals("admin")) {
             return "redirect:/admin?page=" + this.currentPage;
         }
         return "redirect:/user/findUserByWechatName?wechatName=" + role;
+    }
+
+    private void stopContainerByContainerId(String containerId) {
+        User user = userRepository.findByContainerId(containerId);
+        String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/stopContainer?id=" + containerId, String.class).getBody();
+        user.setContainerStatus(status);
+        userRepository.save(user);
     }
 
     @GetMapping("/delete")
@@ -228,9 +225,36 @@ public class AdminUserControler {
     public String refreshNetwork() {
         List<User> listUsers = userRepository.findAll();
         listUsers.stream().forEach(user -> {
-            tools.refreshUserNetwork(user, userRepository, restTemplate, logger);
+            containerService.refreshUserNetwork(user, restTemplate, logger);
         });
         logger.info("-----------------------------------------");
+        return "redirect:/admin?page=" + this.currentPage;
+    }
+
+    @GetMapping("/reCreateAllContainers")
+    public String reCreateAllContainers() {
+        List<User> listUsers = userRepository.findAll();
+        logger.info("[Admin][containers] all containers : " + listUsers.size());
+        listUsers.forEach(user -> {
+            String containerId = user.getContainerId();
+            logger.warn("[User](" + user.getWechatName() + ") will destroy :" + containerId);
+            try {
+                stopContainerByContainerId(containerId);
+                user.setContainerStatus("exited");
+                logger.warn("[User][STOP](OK)(" + user.getWechatName() + ") container was [stopped] :" + containerId);
+            } catch (Exception e) {
+                logger.error("[STOP](KO)-> " + containerId + ": container not found！");
+            }
+            try {
+                deleteContainerByContainerId(user.getContainerId(), false);
+                logger.warn("[User][DEL](OK)(" + user.getWechatName() + ") container was [deleted] :" + containerId);
+            } catch (Exception e) {
+                logger.error("[DEL](KO)-> " + containerId + ": container not found！");
+            }
+
+        });
+        listUsers.forEach(user -> containerService.reCreateContainer(client, user, restTemplate));
+        logger.info("[Admin][Containers](OK) were created.");
         return "redirect:/admin?page=" + this.currentPage;
     }
 }
