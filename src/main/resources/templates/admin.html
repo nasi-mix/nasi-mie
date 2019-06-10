@@ -14,10 +14,12 @@
         body {
             margin-top: 70px;
         }
+
         .navbar {
             border: none;
         }
-        .navbar-inverse .navbar-nav>li>a{
+
+        .navbar-inverse .navbar-nav > li > a {
             color: #ffffff;
         }
     </style>
@@ -43,7 +45,8 @@
                     <a href="/">主页</a>
                 </li>
                 <li role="presentation" style="pointer-events: none;">
-                    <a class="bg-primary" href="#"><span style="margin-right: 5px;">付费/总数 :&nbsp;</span><span class="badge" th:text="__${paidUsersCount}__+' / '+__${totalUsersCount}__"></span></a></li>
+                    <a class="bg-primary" href="#"><span style="margin-right: 5px;">付费/总数 :&nbsp;</span><span
+                            class="badge" th:text="__${paidUsersCount}__+' / '+__${totalUsersCount}__"></span></a></li>
                 </li>
             </ul>
 
@@ -112,7 +115,7 @@
                                 type="button" data-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false"
                                 th:classappend="${user.containerStatus=='running'}?'label-success':'label-danger'"
-                                >
+                        >
                             <span style="color:white;" th:if="${user.containerStatus=='running'}">正在运行</span>
                             <span style="color:white;" th:if="${user.containerStatus=='created'}">等待</span>
                             <span style="color:white;" th:if="${user.containerStatus=='exited'}">停止</span>
@@ -206,7 +209,7 @@
                         </div>
                         <div class="form-group">
                             <label for="containerLocation">服务区</label>
-                            <select id="containerLocation" name="containerLocation" class="form-control">
+                            <select id="containerLocation" name="containerLocation" class="form-control" required>
                                 <option th:each="location,it:${locations}" th:text="${location}" th:value="${location}">
                                     区域列表
                                 </option>

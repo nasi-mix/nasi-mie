@@ -23,7 +23,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -53,7 +53,6 @@ public class AdminUserControler {
 
     @GetMapping("/")
     public String index(Model model) {
-//        model.addAttribute("locations", getLocations());
         Map<String, String> map = new HashMap<>();
         for (String location : getLocations()) {
             for (ServiceInstance instance : client.getInstances(location)) {
@@ -96,22 +95,48 @@ public class AdminUserControler {
     }
 
     @PostMapping("/save")
-    public String save(User user) throws IOException {
+    public String save(User user) {
         // 新用户
         if (user.getId() == null || StringUtils.isEmpty(user.getContainerId())) {
-            Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName(), Map.class).getBody();
-            String host = client.getInstances(user.getContainerLocation()).get(0).getHost();
-            user.setContainerId(info.get("containerId"));
-            user.setContainerStatus(info.get("status"));
-            user.setContainerPort(info.get("port"));
-            user.setQrCode(Tools.getSSRUrl(host, info.get("port"), info.get("pass"), user.getContainerLocation()));
+            System.err.println("[新建容器]-> " + user.getWechatName());
+            try {
+                Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName(), Map.class).getBody();
+                updateInfo(user, info);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            //检查是否换机房
+            User oldUser = userRepository.findById(user.getId()).get();
+            if (!oldUser.getContainerLocation().equals(user.getContainerLocation())) {
+                System.err.println("[换机房] [" + user.getWechatName() + "] " + oldUser.getContainerLocation() + " --> " + user.getContainerLocation());
+
+                try {
+                    // 建立新容器
+                    Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName() + "&port=" + oldUser.getContainerPort(), Map.class).getBody();
+                    updateInfo(user, info);
+                    // 删除旧容器
+                    deleteContainerById(oldUser.getContainerId());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
         userRepository.save(user);
         return "redirect:/admin?page=" + this.currentPage;
     }
 
-    @GetMapping("/deleteContainer")
-    public String deleteContainer(@RequestParam("id") String containerId, @RequestParam("role") String role) throws DockerException, InterruptedException {
+    private void updateInfo(User user, Map<String, String> info) throws UnsupportedEncodingException {
+        String host = client.getInstances(user.getContainerLocation()).get(0).getHost();
+        user.setContainerId(info.get("containerId"));
+        user.setContainerStatus(info.get("status"));
+        user.setContainerPort(info.get("port"));
+        user.setQrCode(Tools.getSSRUrl(host, info.get("port"), info.get("pass"), user.getContainerLocation()));
+    }
+
+
+    private void deleteContainerById(String containerId) {
         User user = userRepository.findByContainerId(containerId);
         restTemplate.getForEntity("http://" + user.getContainerLocation() + "/deleteContainer?id=" + containerId, Integer.class);
         user.setContainerStatus("");
@@ -120,6 +145,11 @@ public class AdminUserControler {
         user.setContainerLocation("");
         user.setQrCode("");
         userRepository.save(user);
+    }
+
+    @GetMapping("/deleteContainer")
+    public String deleteContainer(@RequestParam("id") String containerId, @RequestParam("role") String role) throws DockerException, InterruptedException {
+        deleteContainerById(containerId);
         if (role.equals("admin")) {
             return "redirect:/admin?page=" + this.currentPage;
         }
