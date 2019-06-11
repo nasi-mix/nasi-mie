@@ -47,10 +47,10 @@
                 </div>
                 <div class="form-inline col-md-10 col-md-offset-2" style="font-size: 1.2em;">
                     <div class="form-group col-md-5">
-                        <label class="control-label" for="startTime">开始时间：</label>
+                        <label class="control-label" for="containerLocation">实例区域：</label>
 
-                        <p class="form-control-static" id="startTime"
-                           th:text="${#dates.format(user.startTime, 'yyyy-MM-dd')}"></p>
+                        <p class="form-control-static" id="containerLocation"
+                           th:text="${user.containerLocation}"></p>
                     </div>
                     <div class="form-group col-md-5">
                         <label class="control-label" for="endTime">结束时间：</label>
