@@ -49,8 +49,8 @@
                 <th>往返延时</th>
             </tr>
             </thead>
-            <tbody>
-            <tr th:each="location,it:${locationMap}">
+            <tbody id="tbody">
+            <tr th:attr="data-index=${it.index}" th:each="location,it:${locationMap}">
                 <td th:text="${location.key}">location</td>
                 <td th:id="${location.key}" th:attr="data-ip=${location.value},data-location=${location.key}">- ms</td>
             </tr>
@@ -60,21 +60,54 @@
 
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="/js/ping.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/alfg/ping.js@0.2.2/dist/ping.min.js" type="text/javascript"></script>
+
 <script>
-    $(document).ready(async function () {
-        $ips = $('td[data-ip]');
-        for (var i = 0; i < $ips.length; i++) {
-            var locationServer = $ips.eq(i).attr('data-location');
-            var ip = $ips.eq(i).attr('data-ip');
-            await ping('http://' + ip + ':8762').then(function (delta) {
-                console.log('Ping time was ' + String(delta) + ' ms');
-                $("td[data-ip='" + ip + "']").text(String(delta) + ' ms');
-            }).catch(function (err) {
-                console.error('Could not ping remote URL', err);
+    /**
+     * 交换位置
+     * @param arr
+     * @param k
+     * @param j
+     */
+    function change(arr, k, j) {
+        var tmp = arr[k];
+        arr[k] = arr[j];
+        $('tr[data-index=' + k + ']').html(`<td>` + arr[j].location + `</td><td>` + arr[j].latence + ` ms</td>`);
+        arr[j] = tmp;
+        $('tr[data-index=' + j + ']').html(`<td>` + tmp.location + `</td><td>` + tmp.latence + ` ms</td>`);
+    }
+
+    $(document).ready(function () {
+        var p = new Ping();
+        var $ips = $('td[data-ip]');
+        var array = [];
+        $.each($ips, function (index, ele) {
+            var locationServer = $(ele).attr('data-location');
+            var ip = $(ele).attr('data-ip');
+            var tmp = {};
+            tmp['location'] = locationServer;
+            tmp['latence'] = 999;
+            array.push(tmp);
+            p.ping('http://' + ip + ':8762', function (err, data) {
+                if (err) {
+                    tmp['latence'] = 9999;
+                    $("td[data-ip='" + ip + "']").text('服务器可能被墙');
+                } else {
+                    tmp['latence'] = data;
+                    for (let i = 0; i < array.length; i++) {
+                        var pos= 0; //每趟开始时,无记录交换
+                        for (let j = i; j < array.length; j++) {
+                            if (array[i].latence >= array[j].latence) {
+                                change(array, i, j);
+                                pos= j; //记录交换的位置
+                            }
+                        }
+                    }
+                }
             });
-        }
+        });
     });
+
 </script>
 </body>
 </html>
