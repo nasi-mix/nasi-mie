@@ -39,20 +39,26 @@
 
     <div class="panel panel-default" style="margin-top: 10px;">
         <!-- Default panel contents -->
-        <div class="panel-heading">区域延时测试</div>
+        <div class="panel-heading">
+            <span>区域延时测试</span>
+        </div>
 
         <!-- Table -->
         <table class="table">
             <thead>
             <tr>
                 <th>location</th>
-                <th>往返延时</th>
+                <th>
+                    <button class="btn btn-sm btn-primary" onclick="sortLocations()">延迟测试</button>
+                </th>
             </tr>
             </thead>
             <tbody id="tbody">
             <tr th:attr="data-index=${it.index}" th:each="location,it:${locationMap}">
                 <td th:text="${location.key}">location</td>
-                <td th:id="${location.key}" th:attr="data-ip=${location.value},data-location=${location.key}">- ms</td>
+                <td th:id="${location.key}"
+                    th:attr="data-ip=${location.value},data-location=${location.key},data-delay=9999">- ms
+                </td>
             </tr>
             </tbody>
         </table>
@@ -72,12 +78,12 @@
     function change(arr, k, j) {
         var tmp = arr[k];
         arr[k] = arr[j];
-        $('tr[data-index=' + k + ']').html(`<td>` + arr[j].location + `</td><td>` + arr[j].latence + ` ms</td>`);
+        $('tr[data-index=' + k + ']').html(`<td>` + arr[j].location + `</td><td data-location="` + arr[j].location + `"data-ip="` + arr[j].ip + `">` + arr[j].delay + ` ms</td>`);
         arr[j] = tmp;
-        $('tr[data-index=' + j + ']').html(`<td>` + tmp.location + `</td><td>` + tmp.latence + ` ms</td>`);
+        $('tr[data-index=' + j + ']').html(`<td>` + tmp.location + `</td><td data-location="` + tmp.location + `"data-ip="` + tmp.ip + `">` + tmp.delay + ` ms</td>`);
     }
 
-    $(document).ready(function () {
+    function sortLocations() {
         var p = new Ping();
         var $ips = $('td[data-ip]');
         var array = [];
@@ -86,26 +92,31 @@
             var ip = $(ele).attr('data-ip');
             var tmp = {};
             tmp['location'] = locationServer;
-            tmp['latence'] = 999;
+            tmp['delay'] = 9999;
+            tmp['ip'] = ip;
             array.push(tmp);
             p.ping('http://' + ip + ':8762', function (err, data) {
                 if (err) {
-                    tmp['latence'] = 9999;
-                    $("td[data-ip='" + ip + "']").text('服务器可能被墙');
+                    tmp['delay'] = 9999;
+                    $('tr[data-index=' + index + ']').html(`<td>` + tmp.location + `</td><td>服务器可能被墙</td>`);
                 } else {
-                    tmp['latence'] = data;
+                    tmp['delay'] = data;
                     for (let i = 0; i < array.length; i++) {
-                        var pos= 0; //每趟开始时,无记录交换
+                        var pos = 0; //每趟开始时,无记录交换
                         for (let j = i; j < array.length; j++) {
-                            if (array[i].latence >= array[j].latence) {
+                            if (array[i].delay >= array[j].delay) {
                                 change(array, i, j);
-                                pos= j; //记录交换的位置
+                                pos = j; //记录交换的位置
                             }
                         }
                     }
                 }
             });
         });
+    }
+
+    $(document).ready(function () {
+        sortLocations();
     });
 
 </script>
