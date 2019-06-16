@@ -8,7 +8,7 @@
     <!--<link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">    -->
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 </head>
-<body onload="main()">
+<body onLoad="main()">
 <div class="container">
     <h3>信息自主查询</h3>
     <hr>
@@ -54,18 +54,11 @@
 <!--<script src="/js/react.development.js"></script>-->
 <!--<script src="/js/react-dom.development.js"></script>-->
 <!--<script src="/js/babel.min.js"></script>-->
-<!--<script src="/js/targets.js"></script>-->
-
 <script type="text/javascript" th:inline="javascript">
     data = {
         "server":/*[[${listServer}]]*/ []
     }
 </script>
 <script src="/js/msmbps.production.js"></script>
-<!--<script>-->
-<!--    $(document).ready(function(){-->
-<!--       main();-->
-<!--    });-->
-<!-- </script>-->
 </body>
 </html>
