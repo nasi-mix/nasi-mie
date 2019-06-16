@@ -15,30 +15,14 @@ class Milliseconds extends React.Component {
     render() {
         return <td className="milliseconds">{
             this.props.milliseconds == 0 ? "..." :
-                (this.props.milliseconds < 0 ? -this.props.milliseconds + "/5" : this.props.milliseconds + " ms")}
+                (this.props.milliseconds < 0 ? -this.props.milliseconds + "/3" : this.props.milliseconds + " ms")}
         </td>;
     }
 }
 
 class Name extends React.Component {
-    constructor(props) {
-        super(props);
-        // this.handleClick = this.handleClick.bind(this);
-    }
-
-    handleClick() {
-        const s = this.props.url;
-        const i = s.indexOf("://") + 3;
-        const j = s.indexOf("/", i);
-        const server = s.substring(i, j);
-        // this.props.showNotice(this.props.provider, this.props.locationName, server, this.props.download);
-    }
-
     render() {
-        // const spanStyle = {
-        //     cursor: (this.props.download == void (0) ? "help" : "pointer"),
-        // };
-        return <td className="name" data-url={this.props.url}>
+        return <td className="name">
             {this.props.locationName}
         </td>;
     }
@@ -47,20 +31,14 @@ class Name extends React.Component {
 class Line extends React.Component {
     constructor(props) {
         super(props);
-        // this.handleClick = this.handleClick.bind(this);
-        console.log(props)
     }
+
     render() {
-        return <tr className={"line"}
-            // style={{
-            // transform: "translateY(" + (this.props.index * (15)) + "px)",
-            // zIndex: this.props.number - this.props.index + 1
-            // }}
-        >
+        return <tr className={"line"}>
             <Name locationName={this.props.name}
                   provider={this.props.provider}
                   url={this.props.url}
-                  index={this.props.index}
+                  key={this.props.index}
             />
             <Milliseconds milliseconds={this.props.milliseconds}/>
         </tr>;
@@ -135,7 +113,6 @@ class List extends React.Component {
         this.prepareTimeOut();
         if (!this.data.testTimeOut) {
             this.data.img.src = currentLine.current.props.url + "" + Math.random();
-            // this.data.img.src = currentLine.current.props.url + "favicon.ico?"+ Math.random();
         }
     }
 
@@ -155,7 +132,6 @@ class List extends React.Component {
         this.prepareTimeOut();
         if (!this.data.testTimeOut) {
             this.data.img.src = currentLine.current.props.url + "" + Math.random();
-            // this.data.img.src = currentLine.current.props.url + "favicon.ico?"+ Math.random();
 
         }
     }
@@ -170,7 +146,7 @@ class List extends React.Component {
         if (currentCostOfTime < this.data.minOfCurrentTarget) {
             this.data.minOfCurrentTarget = currentCostOfTime;
         }
-        if (this.data.countOfLoad == 5) {
+        if (this.data.countOfLoad == 3) {
             let newMillisecondsOfTargets = this.state.millisecondsOfTargets.slice();
             newMillisecondsOfTargets[this.data.currentIndex] = this.data.minOfCurrentTarget;
             this.setState({millisecondsOfTargets: newMillisecondsOfTargets});
@@ -237,10 +213,6 @@ class App extends React.Component {
         this.data = {countOfFinishedProviders: 0};
         this.providerFinished = this.providerFinished.bind(this);
         this.allProvidersFinished = this.allProvidersFinished.bind(this);
-        // this.showMessage=this.showMessage.bind(this);
-        // this.hideMessage=this.hideMessage.bind(this);
-        // this.showNotice=this.showNotice.bind(this);
-        // this.hideNotice=this.hideNotice.bind(this);
     }
 
     providerFinished() {
@@ -255,22 +227,20 @@ class App extends React.Component {
         return <div>
             {Object.keys(this.state.allData).map(function (item, index) {
                 const sectionStyle = {
-                    height: this.state.allData[item].length * (18 + 2) + 30 + "px",
+                    // height: this.state.allData[item].length * (18 + 2) + 30 + "px",
                     "marginBottom": "0px"
                 };
                 return (
-                    <table className={"table"} key={index} style={sectionStyle}>
-                        {/* <h3>{item}</h3> */}
+                    <table className={"table"} style={sectionStyle}>
                         <thead>
                         <tr>
-                            <th>location</th>
+                            <th>Location</th>
                             <th>延迟测试</th>
                         </tr>
                         </thead>
                         <List
                             provider={item}
                             providerFinished={this.providerFinished}
-                            showNotice={this.showNotice}
                             targets={this.state.allData[item]}/>
                     </table>
                 );

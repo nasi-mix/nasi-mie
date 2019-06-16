@@ -8,7 +8,7 @@
     <!--<link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">    -->
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 </head>
-<body onload="setTimeout('main()',1000)">
+<body onload="main()">
 <div class="container">
     <h3>信息自主查询</h3>
     <hr>
@@ -44,25 +44,6 @@
         </div>
         <div id="result">
         </div>
-        <!-- Table -->
-        <!--        <table class="table">-->
-        <!--            <thead>-->
-        <!--            <tr>-->
-        <!--                <th>location</th>-->
-        <!--                <th>-->
-        <!--                    <button class="btn btn-sm btn-primary" onclick="sortLocations()">延迟测试</button>-->
-        <!--                </th>-->
-        <!--            </tr>-->
-        <!--            </thead>-->
-        <!--            <tbody id="tbody">-->
-        <!--            <tr th:attr="data-index=${it.index}" th:each="location,it:${locationMap}">-->
-        <!--                <td th:text="${location.key}">location</td>-->
-        <!--                <td th:id="${location.key}"-->
-        <!--                    th:attr="data-ip=${location.value},data-location=${location.key},data-delay=9999">- ms-->
-        <!--                </td>-->
-        <!--            </tr>-->
-        <!--            </tbody>-->
-        <!--        </table>-->
     </div>
 
 </div>
@@ -72,7 +53,7 @@
 <script src="/js/react-dom.production.min.js"></script>
 <!--<script src="/js/react.development.js"></script>-->
 <!--<script src="/js/react-dom.development.js"></script>-->
-<script src="/js/babel.min.js"></script>
+<!--<script src="/js/babel.min.js"></script>-->
 <!--<script src="/js/targets.js"></script>-->
 
 <script type="text/javascript" th:inline="javascript">
@@ -80,7 +61,11 @@
         "server":/*[[${listServer}]]*/ []
     }
 </script>
-
-<script type="text/babel" src="/js/msmbps.development.js"></script>
+<script src="/js/msmbps.production.js"></script>
+<!--<script>-->
+<!--    $(document).ready(function(){-->
+<!--       main();-->
+<!--    });-->
+<!-- </script>-->
 </body>
 </html>
