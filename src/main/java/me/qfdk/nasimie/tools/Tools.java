@@ -1,14 +1,7 @@
 package me.qfdk.nasimie.tools;
 
 import me.qfdk.nasimie.entity.User;
-import me.qfdk.nasimie.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
@@ -25,12 +18,16 @@ public class Tools {
         return new String(Base64.getEncoder().encode(tmp.getBytes())).replace("=", "");
     }
 
-    public static void updateInfo(DiscoveryClient client, User user, Map<String, String> info) throws UnsupportedEncodingException {
-        String host = client.getInstances(user.getContainerLocation()).get(0).getHost();
+    public static void updateInfo(User user, Map<String, String> info) throws UnsupportedEncodingException {
+//        String host = client.getInstances(user.getContainerLocation()).get(0).getHost();
         user.setContainerId(info.get("containerId"));
         user.setContainerStatus(info.get("status"));
         user.setContainerPort(info.get("port"));
-        user.setQrCode(Tools.getSSRUrl(host, info.get("port"), info.get("pass"), user.getContainerLocation()));
+        user.setQrCode(Tools.getSSRUrl(user.getContainerLocation() + ".qfdk.me", info.get("port"), info.get("pass"), user.getContainerLocation()));
     }
 
+    // 加密方法
+    public static String getPass(String str) {
+        return new StringBuffer(str).reverse().toString();
+    }
 }

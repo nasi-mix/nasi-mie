@@ -24,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -103,7 +104,7 @@ public class AdminUserControler {
             logger.info("[新建容器]-> " + user.getWechatName());
             try {
                 Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName(), Map.class).getBody();
-                Tools.updateInfo(client, user, info);
+                Tools.updateInfo(user, info);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -117,7 +118,7 @@ public class AdminUserControler {
                 try {
                     // 建立新容器
                     Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName() + "&port=" + oldUser.getContainerPort(), Map.class).getBody();
-                    Tools.updateInfo(client, user, info);
+                    Tools.updateInfo(user, info);
                     // 删除旧容器
                     deleteContainerByContainerId(oldUser.getContainerId(), true);
                 } catch (Exception e) {
@@ -258,7 +259,25 @@ public class AdminUserControler {
 
         });
         listUsers.forEach(user -> containerService.reCreateContainer(client, user, restTemplate));
-        logger.info("[Admin][Containers](OK) were created.");
+        logger.info("[Admin][Containers](OK) was created.");
         return "redirect:/admin?page=" + this.currentPage;
     }
+
+    @GetMapping("/updateQrCode")
+    public String updateQrCode() {
+        List<User> listUsers = userRepository.findAll();
+        listUsers.forEach(user -> {
+            try {
+                user.setQrCode(Tools.getSSRUrl(user.getContainerLocation() + ".qfdk.me", user.getContainerPort(), Tools.getPass(user.getWechatName()), user.getContainerLocation()));
+                userRepository.save(user);
+                logger.info("[Admin][updateQrCode](OK)  updateQrCode for " + user.getWechatName() + " was succeed.");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                logger.error("[Admin][updateQrCode](KO)  updateQrCode.");
+
+            }
+        });
+        return "redirect:/admin?page=" + this.currentPage;
+    }
+
 }
