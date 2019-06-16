@@ -53,14 +53,16 @@ public class AdminUserControler {
 
     @GetMapping("/")
     public String index(Model model) {
-        Map<String, String> map = new HashMap<>();
+        List<Map<String, String>> listServer = new ArrayList<>();
         for (String location : getLocations()) {
             for (ServiceInstance instance : client.getInstances(location)) {
-                map.put(location, instance.getHost());
+                Map map = new HashMap<String, String>();
+                map.put("name", location);
+                map.put("url", "http://" + instance.getHost() + ":" + instance.getPort() + "/");
+                listServer.add(map);
             }
         }
-        model.addAttribute("locationMap", map);
-
+        model.addAttribute("listServer", listServer);
         return "index";
     }
 
