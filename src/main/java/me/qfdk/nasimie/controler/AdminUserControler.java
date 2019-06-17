@@ -104,7 +104,7 @@ public class AdminUserControler {
             logger.info("[新建容器]-> " + user.getWechatName());
             try {
                 Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName(), Map.class).getBody();
-                Tools.updateInfo(user, info);
+                Tools.updateInfo(user, info, userRepository);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -118,7 +118,7 @@ public class AdminUserControler {
                 try {
                     // 建立新容器
                     Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName() + "&port=" + oldUser.getContainerPort(), Map.class).getBody();
-                    Tools.updateInfo(user, info);
+                    Tools.updateInfo(user, info, userRepository);
                     // 删除旧容器
                     deleteContainerByContainerId(oldUser.getContainerId(), true);
                 } catch (Exception e) {
