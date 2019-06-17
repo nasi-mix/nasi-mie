@@ -47,8 +47,7 @@ public class ContainerService {
         logger.info("[User][Container](" + user.getWechatName() + ") will create a new container.");
         try {
             Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName() + "&port=" + user.getContainerPort(), Map.class).getBody();
-            Tools.updateInfo(user, info);
-            userRepository.save(user);
+            Tools.updateInfo(user, info, userRepository);
             logger.info("[User][Container](OK) : " + user.getContainerId());
         } catch (Exception e) {
             logger.error("[User][Container](KO) -> " + user.getWechatName());

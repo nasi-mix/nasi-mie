@@ -1,6 +1,7 @@
 package me.qfdk.nasimie.tools;
 
 import me.qfdk.nasimie.entity.User;
+import me.qfdk.nasimie.repository.UserRepository;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
@@ -18,12 +19,13 @@ public class Tools {
         return new String(Base64.getEncoder().encode(tmp.getBytes())).replace("=", "");
     }
 
-    public static void updateInfo(User user, Map<String, String> info) throws UnsupportedEncodingException {
+    public static void updateInfo(User user, Map<String, String> info, UserRepository userRepository) throws UnsupportedEncodingException {
 //        String host = client.getInstances(user.getContainerLocation()).get(0).getHost();
         user.setContainerId(info.get("containerId"));
         user.setContainerStatus(info.get("status"));
         user.setContainerPort(info.get("port"));
         user.setQrCode(Tools.getSSRUrl(user.getContainerLocation() + ".qfdk.me", info.get("port"), info.get("pass"), user.getContainerLocation()));
+        userRepository.save(user);
     }
 
     // 加密方法
