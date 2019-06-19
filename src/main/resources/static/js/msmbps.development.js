@@ -191,8 +191,8 @@ class App extends React.Component {
                     >
                         <thead>
                         <tr>
-                            <th>location</th>
-                            <th>延迟测试</th>
+                            <th>服务器地点</th>
+                            <th>往返时间</th>
                         </tr>
                         </thead>
                         <List
