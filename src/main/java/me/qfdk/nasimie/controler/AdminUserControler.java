@@ -118,11 +118,13 @@ public class AdminUserControler {
                 try {
                     // 建立新容器
                     Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName() + "&port=" + oldUser.getContainerPort(), Map.class).getBody();
+                    logger.info(user.getContainerLocation() + " ] 建立容器 -> " + info);
                     Tools.updateInfo(user, info, userRepository);
                     // 删除旧容器
                     deleteContainerByContainerId(oldUser.getContainerId(), true);
                 } catch (Exception e) {
                     e.printStackTrace();
+                    logger.error("[换机房失败]");
                 }
             }
         }
@@ -142,6 +144,7 @@ public class AdminUserControler {
         }
         user.setQrCode("");
         userRepository.save(user);
+        logger.info("[删除旧容器] OK");
     }
 
     @GetMapping("/deleteContainer")
