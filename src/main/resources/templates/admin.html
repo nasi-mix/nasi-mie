@@ -57,8 +57,9 @@
     </nav>
 
     <button class="btn btn-success addUser"><span class="glyphicon glyphicon-plus"></span> 新增用户</button>
-<!--    <a class="btn btn-primary refresh" href="/reCreateAllContainers"><span class="glyphicon glyphicon-refresh"></span> 重建所有容器</a>-->
-    <a class="btn btn-primary refresh" href="/updateQrCode"><span class="glyphicon glyphicon-refresh"></span> 重建QrCode</a>
+    <!--    <a class="btn btn-primary refresh" href="/reCreateAllContainers"><span class="glyphicon glyphicon-refresh"></span> 重建所有容器</a>-->
+    <a class="btn btn-primary refresh" href="/updateQrCode"><span class="glyphicon glyphicon-refresh"></span>
+        重建QrCode</a>
     <a class="btn btn-primary refresh" href="/refreshNetwork"><span class="glyphicon glyphicon-refresh"></span> 刷新流量</a>
     <div class="card">
         <table class="table table-hover">
@@ -211,8 +212,8 @@
                         <div class="form-group">
                             <label for="containerLocation">服务区</label>
                             <select id="containerLocation" name="containerLocation" class="form-control" required>
-                                <option th:each="location,it:${locations}" th:text="${location}" th:value="${location}">
-                                    区域列表
+                                <option th:each="key,it:${locations.keySet()}" th:value="${key}">
+                                    <span th:text="${key} + ' ('+${locations.get(key)}+')'"></span>
                                 </option>
                             </select>
                         </div>

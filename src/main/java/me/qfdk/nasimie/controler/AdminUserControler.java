@@ -55,7 +55,7 @@ public class AdminUserControler {
     @GetMapping("/")
     public String index(Model model) {
         List<Map<String, String>> listServer = new ArrayList<>();
-        for (String location : getLocations()) {
+        for (String location : getLocations().keySet()) {
             for (ServiceInstance instance : client.getInstances(location)) {
                 Map map = new HashMap<String, String>();
                 map.put("name", location);
@@ -215,12 +215,18 @@ public class AdminUserControler {
         return userRepository.findById(id).get();
     }
 
-    private List<String> getLocations() {
+    private Map<String, Integer> getLocations() {
         List<String> services = client.getServices();
-        List<String> available_Services = new ArrayList<>();
+        Map<String, Integer> available_Services = new HashMap<>();
         for (String service : services) {
             if (service.contains("campur")) {
-                available_Services.add(service);
+                try {
+                    int nb = restTemplate.getForEntity("http://" + service + "/containerCount", Integer.class).getBody();
+                    available_Services.put(service, nb);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logger.error(service + " --> 无响应");
+                }
             }
         }
         return available_Services;
