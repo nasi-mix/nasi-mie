@@ -55,7 +55,7 @@ public class AdminUserControler {
     @GetMapping("/")
     public String index(Model model) {
         List<Map<String, String>> listServer = new ArrayList<>();
-        for (String location : getLocations().keySet()) {
+        for (String location : getLocations(false).keySet()) {
             for (ServiceInstance instance : client.getInstances(location)) {
                 Map map = new HashMap<String, String>();
                 map.put("name", location);
@@ -88,7 +88,7 @@ public class AdminUserControler {
 
     @GetMapping("/admin")
     public String show(Authentication authentication, Model model, @RequestParam(defaultValue = "0") int page) {
-        model.addAttribute("locations", getLocations());
+        model.addAttribute("locations", getLocations(true));
         model.addAttribute("users", userRepository.findAll(PageRequest.of(page, 10)));
         model.addAttribute("currentPage", page);
         model.addAttribute("paidUsersCount", userRepository.findUserByIconNotLike("%label-warning%").size());
@@ -215,14 +215,19 @@ public class AdminUserControler {
         return userRepository.findById(id).get();
     }
 
-    private Map<String, Integer> getLocations() {
+    private Map<String, Integer> getLocations(boolean withCount) {
         List<String> services = client.getServices();
         Map<String, Integer> available_Services = new HashMap<>();
         for (String service : services) {
             if (service.contains("campur")) {
                 try {
-                   // int nb = restTemplate.getForEntity("http://" + service + "/containerCount", Integer.class).getBody();
-                    available_Services.put(service, 10);
+                    int nb;
+                    if (withCount) {
+                        nb = restTemplate.getForEntity("http://" + service + "/containerCount", Integer.class).getBody();
+                    } else {
+                        nb = 0;
+                    }
+                    available_Services.put(service, nb);
                 } catch (Exception e) {
                     e.printStackTrace();
                     logger.error(service + " --> 无响应");
