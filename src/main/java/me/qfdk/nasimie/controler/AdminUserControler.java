@@ -221,8 +221,8 @@ public class AdminUserControler {
         for (String service : services) {
             if (service.contains("campur")) {
                 try {
-                    int nb = restTemplate.getForEntity("http://" + service + "/containerCount", Integer.class).getBody();
-                    available_Services.put(service, nb);
+                   // int nb = restTemplate.getForEntity("http://" + service + "/containerCount", Integer.class).getBody();
+                    available_Services.put(service, 10);
                 } catch (Exception e) {
                     e.printStackTrace();
                     logger.error(service + " --> 无响应");
