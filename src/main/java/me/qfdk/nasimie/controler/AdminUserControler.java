@@ -88,13 +88,18 @@ public class AdminUserControler {
 
     @GetMapping("/admin")
     public String show(Authentication authentication, Model model, @RequestParam(defaultValue = "0") int page) {
-        model.addAttribute("locations", getLocations(true));
         model.addAttribute("users", userRepository.findAll(PageRequest.of(page, 10)));
         model.addAttribute("currentPage", page);
         model.addAttribute("paidUsersCount", userRepository.findUserByIconNotLike("%label-warning%").size());
         model.addAttribute("totalUsersCount", userRepository.findAll().size());
         this.currentPage = page;
         return "admin";
+    }
+
+    @GetMapping("/getLocations")
+    @ResponseBody
+    public Map<String, Integer> getLocations() {
+        return getLocations(true);
     }
 
     @PostMapping("/save")
@@ -229,7 +234,6 @@ public class AdminUserControler {
                     }
                     available_Services.put(service, nb);
                 } catch (Exception e) {
-                    e.printStackTrace();
                     logger.error(service + " --> 无响应");
                 }
             }
