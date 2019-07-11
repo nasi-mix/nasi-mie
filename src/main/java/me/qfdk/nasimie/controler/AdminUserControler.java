@@ -92,6 +92,7 @@ public class AdminUserControler {
         model.addAttribute("currentPage", page);
         model.addAttribute("paidUsersCount", userRepository.findUserByIconNotLike("%label-warning%").size());
         model.addAttribute("totalUsersCount", userRepository.findAll().size());
+        model.addAttribute("locations", getLocations(true));
         this.currentPage = page;
         return "admin";
     }
@@ -226,9 +227,10 @@ public class AdminUserControler {
         for (String service : services) {
             if (service.contains("campur")) {
                 try {
-                    int nb;
+                    int nb = 0;
                     if (withCount) {
-                        nb = restTemplate.getForEntity("http://" + service + "/containerCount", Integer.class).getBody();
+                        nb = userRepository.countByContainerLocation(service);
+//                        nb = restTemplate.getForEntity("http://" + service + "/containerCount", Integer.class).getBody();
                     } else {
                         nb = 0;
                     }

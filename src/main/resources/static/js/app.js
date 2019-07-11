@@ -6,51 +6,49 @@ $(document).ready(function () {
     $('.addUser,.table .editBtn').on('click', function (e) {
         e.preventDefault();
         var that = $(this);
-        getLocations(function () {
-            if (that.attr('data-id')) {
-                var url = '/findUserById?id=' + that.attr('data-id');
-                $.get(url, function (data) {
-                    $('#id').val(data.id);
-                    $('#qrCode').val(data.qrCode);
-                    $('#containerId').val(data.containerId);
-                    $('#containerPort').val(data.containerPort);
-                    $('#containerStatus').val(data.containerStatus);
-                    $('#networkRx').val(data.networkRx);
-                    $('#networkTx').val(data.networkTx);
-                    $('#wechatName').val(data.wechatName);
-                    $('#nickname').val(data.nickname);
-                    // $('#containerLocation').val(data.containerLocation);
-                    $('option[value=' + data.containerLocation + ']').attr('selected', true);
-                    $('#icon').val(data.icon);
-                    $('#startTime').val(data.startTime);
-                    $('#endTime').val(data.endTime);
-                    if (data.isEnable) {
-                        $('#isEnableOui').prop('checked', true);
-                    } else {
-                        $('#isEnableNon').prop('checked', true);
-                    }
-                    if (data.enableSelfControl) {
-                        $('#enableSelfControlOui').prop('checked', true);
-                    } else {
-                        $('#enableSelfControlNon').prop('checked', true);
-                    }
-                });
-            } else {
-                $('#id').val('');
-                $('#wechatName').val('');
-                $('#startTime').val('');
-                $('#endTime').val('');
-                $('#nickname').val('');
-                $('#containerLocation').val('');
-                $('#isEnableOui').prop('checked', false);
-                $('#isEnableNon').prop('checked', false);
-                $('#enableSelfControlOui').prop('checked', false);
-                $('#enableSelfControlNon').prop('checked', true);
-                $('#networkRx').val(0.0);
-                $('#networkTx').val(0.0);
-                $('#icon').val(`<span class="label label-primary">iOS</span>`);
-            }
-        });
+        if (that.attr('data-id')) {
+            var url = '/findUserById?id=' + that.attr('data-id');
+            $.get(url, function (data) {
+                $('#id').val(data.id);
+                $('#qrCode').val(data.qrCode);
+                $('#containerId').val(data.containerId);
+                $('#containerPort').val(data.containerPort);
+                $('#containerStatus').val(data.containerStatus);
+                $('#networkRx').val(data.networkRx);
+                $('#networkTx').val(data.networkTx);
+                $('#wechatName').val(data.wechatName);
+                $('#nickname').val(data.nickname);
+                // $('#containerLocation').val(data.containerLocation);
+                $('option[value=' + data.containerLocation + ']').attr('selected', true);
+                $('#icon').val(data.icon);
+                $('#startTime').val(data.startTime);
+                $('#endTime').val(data.endTime);
+                if (data.isEnable) {
+                    $('#isEnableOui').prop('checked', true);
+                } else {
+                    $('#isEnableNon').prop('checked', true);
+                }
+                if (data.enableSelfControl) {
+                    $('#enableSelfControlOui').prop('checked', true);
+                } else {
+                    $('#enableSelfControlNon').prop('checked', true);
+                }
+            });
+        } else {
+            $('#id').val('');
+            $('#wechatName').val('');
+            $('#startTime').val('');
+            $('#endTime').val('');
+            $('#nickname').val('');
+            $('#containerLocation').val('');
+            $('#isEnableOui').prop('checked', false);
+            $('#isEnableNon').prop('checked', false);
+            $('#enableSelfControlOui').prop('checked', false);
+            $('#enableSelfControlNon').prop('checked', true);
+            $('#networkRx').val(0.0);
+            $('#networkTx').val(0.0);
+            $('#icon').val('<span class="label label-primary">iOS</span>');
+        }
         $('#myModal').modal();
     });
     loading();
@@ -61,17 +59,6 @@ $(document).ready(function () {
 function loading() {
     $('a.btn').on('click', function () {
         $(this).button('loading');
-    });
-}
-
-function getLocations(callback) {
-    $("#containerLocation").empty();
-    $.get('/getLocations', function (data) {
-        var array = Object.keys(data);
-        for (var i = 0; i < array.length; i++) {
-            $("#containerLocation").append(`<option value='` + array[i] + `'>` + array[i] + ` (` + data[array[i]] + `)</option>`);
-        }
-        callback();
     });
 }
 

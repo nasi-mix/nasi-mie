@@ -212,6 +212,11 @@
                         <div class="form-group">
                             <label for="containerLocation">服务区</label>
                             <select id="containerLocation" name="containerLocation" class="form-control" required>
+                                <option value="" selected="selected">--- 选择服务区 ---</option>
+                                <option th:each="key,it:${locations.keySet()}" th:value="${key}">
+                                    <span th:text="${key}"></span>
+                                    <span th:text="' ('+${locations.get(key)}+')'"></span>
+                                </option>
                             </select>
                         </div>
                         <div class="form-group">

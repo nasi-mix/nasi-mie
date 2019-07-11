@@ -11,4 +11,5 @@ public interface UserRepository extends JpaRepository<User,Integer> {
     User findByContainerId(String containerId);
     User findByWechatName(String name);
     List<User> findUserByIconNotLike(String icon);
+    Integer countByContainerLocation(String location);
 }
