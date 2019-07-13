@@ -22,6 +22,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
@@ -46,25 +47,39 @@ public class AdminUserControler {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private List<Map<String, String>> listServer = new ArrayList<>();
+
+
     @InitBinder
     protected void initBinder(WebDataBinder binder) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
     }
 
+    @PostConstruct
+    public void init() {
+        initServersList();
+    }
+
     @GetMapping("/")
     public String index(Model model) {
-        List<Map<String, String>> listServer = new ArrayList<>();
+        model.addAttribute("listServer", listServer);
+        return "index";
+    }
+
+    @GetMapping("/init")
+    @ResponseBody
+    public String initServersList() {
         for (String location : getLocations(false).keySet()) {
             for (ServiceInstance instance : client.getInstances(location)) {
-                Map map = new HashMap<String, String>();
+                Map<String, String> map = new HashMap<>();
                 map.put("name", location);
                 map.put("url", "http://" + instance.getHost() + ":" + instance.getPort() + "/");
                 listServer.add(map);
             }
         }
-        model.addAttribute("listServer", listServer);
-        return "index";
+        logger.info("[admin] init list server.");
+        return "OK";
     }
 
     @GetMapping("/help")
@@ -115,8 +130,8 @@ public class AdminUserControler {
                 e.printStackTrace();
             }
         } else {
-            //检查是否换机房
             User oldUser = userRepository.findById(user.getId()).get();
+            //检查是否换机房
             if (!oldUser.getContainerLocation().equals(user.getContainerLocation())) {
                 logger.info("[换机房] [" + user.getWechatName() + "] " + oldUser.getContainerLocation() + " --> " + user.getContainerLocation());
 
