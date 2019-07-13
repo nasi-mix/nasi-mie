@@ -70,6 +70,7 @@ public class AdminUserControler {
     @GetMapping("/init")
     @ResponseBody
     public String initServersList() {
+        listServer.clear();
         for (String location : getLocations(false).keySet()) {
             for (ServiceInstance instance : client.getInstances(location)) {
                 Map<String, String> map = new HashMap<>();
