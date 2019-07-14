@@ -323,4 +323,20 @@ public class AdminUserControler {
         return "redirect:/admin?page=" + this.currentPage;
     }
 
+    @GetMapping("/cleanNetworks")
+    public String cleanNetworks() {
+        List<User> listUsers = userRepository.findAll();
+        listUsers.forEach(user -> {
+            try {
+                user.setNetworkRx(0);
+                user.setNetworkTx(0);
+                userRepository.save(user);
+                logger.info("[Admin][cleanNetworks](OK)  cleanNetworks for " + user.getWechatName() + " was succeed.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.error("[Admin][cleanNetworks](KO)  cleanNetworks.");
+            }
+        });
+        return "redirect:/admin?page=" + this.currentPage;
+    }
 }
