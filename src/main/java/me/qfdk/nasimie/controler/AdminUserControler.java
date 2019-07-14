@@ -260,11 +260,19 @@ public class AdminUserControler {
     }
 
     @GetMapping("/refreshNetwork")
-    public String refreshNetwork() {
+    public String refreshNetwork(@RequestParam("instanceLocation") String instanceLocation) {
         List<User> listUsers = userRepository.findAll();
-        listUsers.stream().forEach(user -> {
-            containerService.refreshUserNetwork(user, restTemplate, logger);
-        });
+        if (instanceLocation.equals("all")) {
+            listUsers.stream().forEach(user -> {
+                containerService.refreshUserNetwork(user, restTemplate, logger);
+            });
+        } else {
+            listUsers.stream().filter(instance ->
+                    instance.getContainerLocation().equals(instanceLocation)
+            ).forEach(user -> {
+                containerService.refreshUserNetwork(user, restTemplate, logger);
+            });
+        }
         logger.info("-----------------------------------------");
         return "redirect:/admin?page=" + this.currentPage;
     }

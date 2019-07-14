@@ -31,8 +31,14 @@ public class ContainerService {
     public void refreshUserNetwork(User user, RestTemplate restTemplate, Logger logger) {
         try {
             Map<String, Double> traffic = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/getNetworkStats?id=" + user.getContainerId(), Map.class).getBody();
-            user.setNetworkTx(user.getNetworkTx() + traffic.get("txBytes"));
-            user.setNetworkRx(user.getNetworkRx() + traffic.get("rxBytes"));
+            if (user.getNetworkTx() > traffic.get("txBytes")) {
+                user.setNetworkTx(user.getNetworkTx() + traffic.get("txBytes"));
+                user.setNetworkRx(user.getNetworkRx() + traffic.get("rxBytes"));
+            } else {
+                user.setNetworkTx(traffic.get("txBytes"));
+                user.setNetworkRx(traffic.get("rxBytes"));
+            }
+
             userRepository.save(user);
             logger.info("[Network Traffic](OK)-> " + user.getWechatName());
         } catch (Exception e) {
