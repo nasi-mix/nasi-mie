@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller()
 public class AdminUserControler {
@@ -71,14 +72,16 @@ public class AdminUserControler {
     @ResponseBody
     public String initServersList() {
         listServer.clear();
-        for (String location : getLocations(false).keySet()) {
+        getLocations(false)
+                .keySet().stream()
+                .filter(s -> !s.contains("nasi-campur-cn")).collect(Collectors.toList()).forEach(location -> {
             for (ServiceInstance instance : client.getInstances(location)) {
                 Map<String, String> map = new HashMap<>();
                 map.put("name", location);
                 map.put("url", "http://" + instance.getHost() + ":" + instance.getPort() + "/");
                 listServer.add(map);
             }
-        }
+        });
         logger.info("[admin] init list server.");
         return "OK";
     }
