@@ -1,4 +1,4 @@
-package me.qfdk.nasimie.controler;
+package me.qfdk.nasimie.controller;
 
 import me.qfdk.nasimie.entity.User;
 import me.qfdk.nasimie.repository.UserRepository;

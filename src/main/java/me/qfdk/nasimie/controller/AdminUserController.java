@@ -1,14 +1,14 @@
-package me.qfdk.nasimie.controler;
+package me.qfdk.nasimie.controller;
 
 import com.spotify.docker.client.exceptions.DockerException;
+import lombok.extern.slf4j.Slf4j;
 import me.qfdk.nasimie.entity.User;
 import me.qfdk.nasimie.repository.UserRepository;
 import me.qfdk.nasimie.service.ContainerService;
 import me.qfdk.nasimie.tools.Tools;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -30,8 +30,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Controller()
-public class AdminUserControler {
+@Controller
+@Slf4j
+public class AdminUserController {
     @Autowired
     RestTemplate restTemplate;
 
@@ -44,9 +45,10 @@ public class AdminUserControler {
     @Autowired
     private ContainerService containerService;
 
-    private int currentPage;
+    @Value("${nasiCampurSsh.sshPassword}")
+    private String sshPassword;
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private int currentPage;
 
     private List<Map<String, String>> listServer = new ArrayList<>();
 
@@ -82,7 +84,7 @@ public class AdminUserControler {
                 listServer.add(map);
             }
         });
-        logger.info("[admin] init list server.");
+        log.info("[admin] init list server.");
         return "OK";
     }
 
@@ -126,10 +128,22 @@ public class AdminUserControler {
     public String save(User user) {
         // 新用户
         if (user.getId() == null || StringUtils.isEmpty(user.getContainerId())) {
-            logger.info("[新建容器]-> " + user.getWechatName());
+            log.info("[新建容器]-> " + user.getWechatName());
             try {
                 Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName(), Map.class).getBody();
                 user = Tools.updateInfo(user, info);
+                if (!user.getPontLocation().equals("non")) {
+                    log.info("[添加端口转发] {} -> {}", user.getPontLocation(), user.getContainerPort());
+                    restTemplate.getForEntity("http://" + user.getPontLocation() + "/addPont?host=" + user.getContainerLocation() + ".qfdk.me&port=" + user.getContainerPort() + "&sshUser=root" + "&sshPassword=" + sshPassword, String.class);
+                } else {
+                    try {
+                        Integer.parseInt(user.getContainerPort());
+                        restTemplate.getForEntity("http://" + user.getPontLocation() + "/deletePont?port=" + user.getContainerPort(), String.class);
+                        log.error("[添加端口转发删除] {} -> {}", user.getPontLocation(), user.getContainerPort());
+                    } catch (Exception e) {
+                        log.error("[添加端口转发] {} -> {}", user.getPontLocation(), user.getContainerPort());
+                    }
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -137,20 +151,21 @@ public class AdminUserControler {
             User oldUser = userRepository.findById(user.getId()).get();
             //检查是否换机房
             if (!oldUser.getContainerLocation().equals(user.getContainerLocation())) {
-                logger.info("[换机房] [" + user.getWechatName() + "] " + oldUser.getContainerLocation() + " --> " + user.getContainerLocation());
+                log.info("[换机房] [" + user.getWechatName() + "] " + oldUser.getContainerLocation() + " --> " + user.getContainerLocation());
 
                 try {
                     // 建立新容器
                     Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName() + "&port=" + oldUser.getContainerPort(), Map.class).getBody();
-                    logger.info(user.getContainerLocation() + " ] 建立容器 -> " + info);
+                    log.info(user.getContainerLocation() + " ] 建立容器 -> " + info);
                     user = Tools.updateInfo(user, info);
                     // 删除旧容器
                     deleteContainerByContainerId(oldUser.getContainerId(), true);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    logger.error("[换机房失败]");
+                    log.error("[换机房失败]");
                 }
             }
+
         }
         userRepository.save(user);
         return "redirect:/admin?page=" + this.currentPage;
@@ -168,7 +183,7 @@ public class AdminUserControler {
         }
         user.setQrCode("");
         userRepository.save(user);
-        logger.info("[删除旧容器] OK");
+        log.info("[删除旧容器] OK");
     }
 
     @GetMapping("/deleteContainer")
@@ -255,7 +270,7 @@ public class AdminUserControler {
                     }
                     available_Services.put(service, nb);
                 } catch (Exception e) {
-                    logger.error(service + " --> 无响应");
+                    log.error(service + " --> 无响应");
                 }
             }
         }
@@ -267,45 +282,45 @@ public class AdminUserControler {
         List<User> listUsers = userRepository.findAll();
         if (instanceLocation.equals("all")) {
             listUsers.stream().forEach(user -> {
-                containerService.refreshUserNetwork(user, restTemplate, logger);
+                containerService.refreshUserNetwork(user, restTemplate, log);
             });
         } else {
             listUsers.stream().filter(instance ->
                     instance.getContainerLocation().equals(instanceLocation)
             ).forEach(user -> {
-                containerService.refreshUserNetwork(user, restTemplate, logger);
+                containerService.refreshUserNetwork(user, restTemplate, log);
             });
         }
-        logger.info("-----------------------------------------");
+        log.info("-----------------------------------------");
         return "redirect:/admin?page=" + this.currentPage;
     }
 
     @GetMapping("/reCreateAllContainers")
     public String reCreateAllContainers() {
         List<User> listUsers = userRepository.findAll();
-        logger.info("[Admin][containers] all containers : " + listUsers.size());
+        log.info("[Admin][containers] all containers : " + listUsers.size());
         listUsers.forEach(user -> {
             String containerId = user.getContainerId();
-            logger.warn("[User](" + user.getWechatName() + ") will destroy :" + containerId);
+            log.warn("[User](" + user.getWechatName() + ") will destroy :" + containerId);
             try {
                 stopContainerByContainerId(containerId);
                 user.setContainerStatus("exited");
-                logger.warn("[User][STOP](OK)(" + user.getWechatName() + ") container was [stopped] :" + containerId);
+                log.warn("[User][STOP](OK)(" + user.getWechatName() + ") container was [stopped] :" + containerId);
             } catch (Exception e) {
-                logger.error("[STOP](KO)-> " + containerId + ": container not found！");
-                logger.error(e.getMessage());
+                log.error("[STOP](KO)-> " + containerId + ": container not found！");
+                log.error(e.getMessage());
             }
             try {
                 deleteContainerByContainerId(user.getContainerId(), false);
-                logger.warn("[User][DEL](OK)(" + user.getWechatName() + ") container was [deleted] :" + containerId);
+                log.warn("[User][DEL](OK)(" + user.getWechatName() + ") container was [deleted] :" + containerId);
             } catch (Exception e) {
-                logger.error("[DEL](KO)-> " + containerId + ": container not found！");
-                logger.error(e.getMessage());
+                log.error("[DEL](KO)-> " + containerId + ": container not found！");
+                log.error(e.getMessage());
             }
 
         });
         listUsers.forEach(user -> containerService.reCreateContainer(client, user, restTemplate));
-        logger.info("[Admin][Containers](OK) was created.");
+        log.info("[Admin][Containers](OK) was created.");
         return "redirect:/admin?page=" + this.currentPage;
     }
 
@@ -316,10 +331,10 @@ public class AdminUserControler {
             try {
                 user.setQrCode(Tools.getSSRUrl(user.getContainerLocation() + ".qfdk.me", user.getContainerPort(), Tools.getPass(user.getWechatName()), user.getContainerLocation()));
                 userRepository.save(user);
-                logger.info("[Admin][updateQrCode](OK)  updateQrCode for " + user.getWechatName() + " was succeed.");
+                log.info("[Admin][updateQrCode](OK)  updateQrCode for " + user.getWechatName() + " was succeed.");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
-                logger.error("[Admin][updateQrCode](KO)  updateQrCode.");
+                log.error("[Admin][updateQrCode](KO)  updateQrCode.");
 
             }
         });
@@ -334,10 +349,10 @@ public class AdminUserControler {
                 user.setNetworkRx(0);
                 user.setNetworkTx(0);
                 userRepository.save(user);
-                logger.info("[Admin][cleanNetworks](OK)  cleanNetworks for " + user.getWechatName() + " was succeed.");
+                log.info("[Admin][cleanNetworks](OK)  cleanNetworks for " + user.getWechatName() + " was succeed.");
             } catch (Exception e) {
                 e.printStackTrace();
-                logger.error("[Admin][cleanNetworks](KO)  cleanNetworks.");
+                log.error("[Admin][cleanNetworks](KO)  cleanNetworks.");
             }
         });
         return "redirect:/admin?page=" + this.currentPage;

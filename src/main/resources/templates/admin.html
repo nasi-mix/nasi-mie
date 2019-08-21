@@ -248,6 +248,16 @@
                             </select>
                         </div>
                         <div class="form-group">
+                            <label for="pontLocation">中转服务</label>
+                            <select id="pontLocation" name="pontLocation" class="form-control">
+                                <option value="non" selected="selected">--- Non ---</option>
+                                <option th:each="key,it:${locations.keySet()}" th:value="${key}">
+                                    <span th:text="${key}"></span>
+                                    <span th:text="' ('+${locations.get(key)}+')'"></span>
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="startTime">开始日期</label>
                             <input autocomplete="off" type="text" id="startTime" name="startTime"
                                    class="form-control date">

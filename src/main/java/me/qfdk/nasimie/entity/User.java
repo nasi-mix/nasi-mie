@@ -1,5 +1,7 @@
 package me.qfdk.nasimie.entity;
 
+import lombok.Data;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -7,6 +9,7 @@ import javax.persistence.Id;
 import java.util.Date;
 
 @Entity(name = "users")
+@Data
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,6 +43,8 @@ public class User {
     private boolean enableSelfControl;
 
     private String containerLocation;
+
+    private String pontLocation;
 
     public User() {
 

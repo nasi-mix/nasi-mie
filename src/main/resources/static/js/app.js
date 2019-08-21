@@ -19,7 +19,8 @@ $(document).ready(function () {
                 $('#wechatName').val(data.wechatName);
                 $('#nickname').val(data.nickname);
                 // $('#containerLocation').val(data.containerLocation);
-                $('option[value=' + data.containerLocation + ']').attr('selected', true);
+                $('#containerLocation option[value=' + data.containerLocation + ']').attr('selected', true);
+                $('#pontLocation option[value=' + data.pontLocation + ']').attr('selected', true);
                 $('#icon').val(data.icon);
                 $('#startTime').val(data.startTime);
                 $('#endTime').val(data.endTime);
@@ -41,6 +42,7 @@ $(document).ready(function () {
             $('#endTime').val('');
             $('#nickname').val('');
             $('#containerLocation').val('');
+            $('#pontLocation').val('non');
             $('#isEnableOui').prop('checked', false);
             $('#isEnableNon').prop('checked', false);
             $('#enableSelfControlOui').prop('checked', false);
