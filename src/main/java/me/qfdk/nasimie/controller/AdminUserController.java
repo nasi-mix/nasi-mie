@@ -71,7 +71,6 @@ public class AdminUserController {
     }
 
     @GetMapping("/init")
-    @ResponseBody
     public String initServersList() {
         listServer.clear();
         getLocations(false)
@@ -84,8 +83,8 @@ public class AdminUserController {
                 listServer.add(map);
             }
         });
-        log.info("[admin] init list server.");
-        return "OK";
+        log.info("[admin] init server list.");
+        return "redirect:/admin";
     }
 
     @GetMapping("/help")

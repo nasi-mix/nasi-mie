@@ -9,6 +9,8 @@ eureka:
 server:
     port: 8899
     schedules: 0 0/30 * * * ?
+nasiCampurSsh:
+  sshPassword: todo
 spring:
     application:
         name: nasi-mie
