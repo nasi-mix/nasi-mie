@@ -42,6 +42,7 @@ public class ContainerService {
             userRepository.save(user);
             logger.info("[Network Traffic](OK)-> " + user.getWechatName());
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error("[Network Traffic](KO)-> " + user.getWechatName());
             user.setNetworkTx(0.0);
             user.setNetworkRx(0.0);

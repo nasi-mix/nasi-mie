@@ -10,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
@@ -50,41 +48,32 @@ public class AdminUserController {
 
     private int currentPage;
 
-    private List<Map<String, String>> listServer = new ArrayList<>();
-
-
     @InitBinder
     protected void initBinder(WebDataBinder binder) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
     }
 
-    @PostConstruct
-    public void init() {
-        initServersList();
-    }
 
     @GetMapping("/")
     public String index(Model model) {
+        List<Map<String, String>> listServer = new ArrayList<>();
+        initServersList(listServer);
         model.addAttribute("listServer", listServer);
         return "index";
     }
 
-    @GetMapping("/init")
-    public String initServersList() {
-        listServer.clear();
+    public void initServersList(List<Map<String, String>> listServer) {
         getLocations(false)
                 .keySet().stream()
                 .filter(s -> !s.contains("nasi-campur-cn")).collect(Collectors.toList()).forEach(location -> {
-            for (ServiceInstance instance : client.getInstances(location)) {
-                Map<String, String> map = new HashMap<>();
-                map.put("name", location);
-                map.put("url", "http://" + location + ".qfdk.me:" + instance.getPort() + "/");
-                listServer.add(map);
-            }
+//            for (ServiceInstance instance : client.getInstances(location)) {
+            Map<String, String> map = new HashMap<>();
+            map.put("name", location);
+            map.put("url", "http://" + location + ".qfdk.me:8762/");
+            listServer.add(map);
+//            }
         });
-        log.info("[admin] init server list.");
-        return "redirect:/admin";
     }
 
     @GetMapping("/help")
@@ -127,7 +116,7 @@ public class AdminUserController {
     public String save(User user) {
         // 新用户
         if (user.getId() == null || StringUtils.isEmpty(user.getContainerId())) {
-            log.info("[新建容器]-> " + user.getWechatName());
+            log.info("[新建容器]-> " + user.getWechatName() + " => " + user.getContainerLocation());
             try {
                 Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName(), Map.class).getBody();
                 user = Tools.updateInfo(user, info);
