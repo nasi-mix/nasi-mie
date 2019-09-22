@@ -79,7 +79,7 @@ public class AdminUserController {
             for (ServiceInstance instance : client.getInstances(location)) {
                 Map<String, String> map = new HashMap<>();
                 map.put("name", location);
-                map.put("url", "http://" + instance.getHost() + ":" + instance.getPort() + "/");
+                map.put("url", "http://" + location + ".qfdk.me:" + instance.getPort() + "/");
                 listServer.add(map);
             }
         });
