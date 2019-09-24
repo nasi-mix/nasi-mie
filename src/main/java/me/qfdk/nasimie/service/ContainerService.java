@@ -62,6 +62,18 @@ public class ContainerService {
         }
     }
 
+    public void reCreateContainerByUser(DiscoveryClient client, User user, RestTemplate restTemplate) {
+        logger.info("[User][Container](" + user.getWechatName() + ") will recreate a new container.");
+        try {
+            Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/reCreateContainer?wechatName=" + user.getWechatName(), Map.class).getBody();
+            userRepository.save(Tools.updateInfo(user, info));
+            logger.info("[User][Container](OK) : " + user.getContainerId());
+        } catch (Exception e) {
+            logger.error("[User][Container](KO) -> " + user.getWechatName());
+            e.printStackTrace();
+        }
+    }
+
     @Scheduled(cron = "${server.schedules}")
     public void refreshNetwork() {
         logger.info("-------------自动定时任务-------------------");

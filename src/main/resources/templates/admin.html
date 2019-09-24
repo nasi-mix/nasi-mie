@@ -70,10 +70,6 @@
             <a class="btn btn-primary refresh" href="/cleanNetworks"><span class="glyphicon glyphicon-refresh"></span>
                 清空流量</a>
         </div>
-        <div class="col-md-1">
-            <a class="btn btn-warning refresh" href="/init"><span class="glyphicon glyphicon-refresh"></span>
-                更新前台</a>
-        </div>
         <div class="col-md-8">
             <form class="form-inline" method="get" action="/refreshNetwork">
                 <select id="instanceLocation" name="instanceLocation" class="form-control">
@@ -187,6 +183,13 @@
                                    th:href="'/deleteContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
                                 ><span class="glyphicon glyphicon-trash"></span>
                                     清空容器</a>
+                            </li>
+                            <li>
+                                <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
+                                   th:if="${!#strings.isEmpty(user.containerId)}"
+                                   th:href="'/reCreateContainer?id='+${user.containerId}+'&location='+${user.containerLocation}+'&role=admin&page='+${currentPage}"
+                                ><span class="glyphicon glyphicon-random"></span>
+                                    重建二维码</a>
                             </li>
                         </ul>
                     </div>

@@ -63,7 +63,7 @@ public class AdminUserController {
         return "index";
     }
 
-    public void initServersList(List<Map<String, String>> listServer) {
+    private void initServersList(List<Map<String, String>> listServer) {
         getLocations(false)
                 .keySet().stream()
                 .filter(s -> !s.contains("nasi-campur-cn")).collect(Collectors.toList()).forEach(location -> {
@@ -94,6 +94,18 @@ public class AdminUserController {
         }
         return "redirect:/login?logout";
     }
+
+//    @GetMapping("/test")
+//    @ResponseBody
+//    public void test() {
+//        List<String> listService = client.getServices();
+//
+//        ServiceInstance serviceInstance = client.getInstances("NASI-CAMPUR-FR-LOCALHOST").get(0);
+//        System.out.println(serviceInstance.getHost());
+//        System.out.println(serviceInstance.getMetadata());
+//        System.out.println(serviceInstance.getUri());
+//        System.out.println(serviceInstance.getServiceId());
+//    }
 
     @GetMapping("/admin")
     public String show(Authentication authentication, Model model, @RequestParam(defaultValue = "0") int page) {
@@ -189,6 +201,16 @@ public class AdminUserController {
         String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/startContainer?id=" + containerId, String.class).getBody();
         user.setContainerStatus(status);
         userRepository.save(user);
+        if (role.equals("admin")) {
+            return "redirect:/admin?page=" + this.currentPage;
+        }
+        return "redirect:/user/findUserByWechatName?wechatName=" + role;
+    }
+
+    @GetMapping("/reCreateContainer")
+    public String reCreateContainer(@RequestParam("id") String containerId, @RequestParam("role") String role) {
+        User user = userRepository.findByContainerId(containerId);
+        containerService.reCreateContainerByUser(client, user, restTemplate);
         if (role.equals("admin")) {
             return "redirect:/admin?page=" + this.currentPage;
         }
