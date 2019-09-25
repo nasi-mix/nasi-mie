@@ -30,7 +30,8 @@ import java.util.stream.Collectors;
 
 @Controller
 @Slf4j
-public class AdminUserController {
+public class AdminUserController
+{
     @Autowired
     RestTemplate restTemplate;
 
@@ -49,66 +50,60 @@ public class AdminUserController {
     private int currentPage;
 
     @InitBinder
-    protected void initBinder(WebDataBinder binder) {
+    protected void initBinder(WebDataBinder binder)
+    {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
     }
 
-
     @GetMapping("/")
-    public String index(Model model) {
+    public String index(Model model)
+    {
         List<Map<String, String>> listServer = new ArrayList<>();
         initServersList(listServer);
         model.addAttribute("listServer", listServer);
         return "index";
     }
 
-    private void initServersList(List<Map<String, String>> listServer) {
+    private void initServersList(List<Map<String, String>> listServer)
+    {
         getLocations(false)
                 .keySet().stream()
                 .filter(s -> !s.contains("nasi-campur-cn")).collect(Collectors.toList()).forEach(location -> {
-//            for (ServiceInstance instance : client.getInstances(location)) {
             Map<String, String> map = new HashMap<>();
             map.put("name", location);
             map.put("url", "http://" + location + ".qfdk.me:8762/");
             listServer.add(map);
-//            }
+
         });
     }
 
     @GetMapping("/help")
-    public String help() {
+    public String help()
+    {
         return "help";
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String login()
+    {
         return "login";
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
-    public String logoutPage(HttpServletRequest request, HttpServletResponse response) {
+    public String logoutPage(HttpServletRequest request, HttpServletResponse response)
+    {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null) {
+        if (auth != null)
+        {
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
         return "redirect:/login?logout";
     }
 
-//    @GetMapping("/test")
-//    @ResponseBody
-//    public void test() {
-//        List<String> listService = client.getServices();
-//
-//        ServiceInstance serviceInstance = client.getInstances("NASI-CAMPUR-FR-LOCALHOST").get(0);
-//        System.out.println(serviceInstance.getHost());
-//        System.out.println(serviceInstance.getMetadata());
-//        System.out.println(serviceInstance.getUri());
-//        System.out.println(serviceInstance.getServiceId());
-//    }
-
     @GetMapping("/admin")
-    public String show(Authentication authentication, Model model, @RequestParam(defaultValue = "0") int page) {
+    public String show(Authentication authentication, Model model, @RequestParam(defaultValue = "0") int page)
+    {
         model.addAttribute("users", userRepository.findAll(PageRequest.of(page, 10)));
         model.addAttribute("currentPage", page);
         model.addAttribute("paidUsersCount", userRepository.findUserByIconNotLike("%label-warning%").size());
@@ -120,49 +115,73 @@ public class AdminUserController {
 
     @GetMapping("/getLocations")
     @ResponseBody
-    public Map<String, Integer> getLocations() {
+    public Map<String, Integer> getLocations()
+    {
         return getLocations(true);
     }
 
     @PostMapping("/save")
-    public String save(User user) {
+    public String save(User user)
+    {
         // 新用户
-        if (user.getId() == null || StringUtils.isEmpty(user.getContainerId())) {
+        if (user.getId() == null || StringUtils.isEmpty(user.getContainerId()))
+        {
             log.info("[新建容器]-> " + user.getWechatName() + " => " + user.getContainerLocation());
-            try {
-                Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName(), Map.class).getBody();
+            try
+            {
+                Map<String, String> info = restTemplate
+                        .getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName(), Map.class)
+                        .getBody();
                 user = Tools.updateInfo(user, info);
-                if (!user.getPontLocation().equals("non")) {
+                if (!user.getPontLocation().equals("non"))
+                {
                     log.info("[添加端口转发] {} -> {}", user.getPontLocation(), user.getContainerPort());
-                    restTemplate.getForEntity("http://" + user.getPontLocation() + "/addPont?host=" + user.getContainerLocation() + ".qfdk.me&port=" + user.getContainerPort() + "&sshUser=root" + "&sshPassword=" + sshPassword, String.class);
-                } else {
-                    try {
+                    restTemplate.getForEntity(
+                            "http://" + user.getPontLocation() + "/addPont?host=" + user.getContainerLocation() + ".qfdk.me&port=" + user
+                                    .getContainerPort() + "&sshUser=root" + "&sshPassword=" + sshPassword, String.class);
+                }
+                else
+                {
+                    try
+                    {
                         Integer.parseInt(user.getContainerPort());
                         restTemplate.getForEntity("http://" + user.getPontLocation() + "/deletePont?port=" + user.getContainerPort(), String.class);
-                        log.error("[添加端口转发删除] {} -> {}", user.getPontLocation(), user.getContainerPort());
-                    } catch (Exception e) {
+                        log.info("[添加端口转发删除] {} -> {}", user.getPontLocation(), user.getContainerPort());
+                    }
+                    catch (Exception e)
+                    {
                         log.error("[添加端口转发] {} -> {}", user.getPontLocation(), user.getContainerPort());
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-        } else {
+            catch (Exception e)
+            {
+                log.error(e.toString());
+            }
+        }
+        else
+        {
             User oldUser = userRepository.findById(user.getId()).get();
             //检查是否换机房
-            if (!oldUser.getContainerLocation().equals(user.getContainerLocation())) {
+            if (!oldUser.getContainerLocation().equals(user.getContainerLocation()))
+            {
                 log.info("[换机房] [" + user.getWechatName() + "] " + oldUser.getContainerLocation() + " --> " + user.getContainerLocation());
 
-                try {
+                try
+                {
                     // 建立新容器
-                    Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName() + "&port=" + oldUser.getContainerPort(), Map.class).getBody();
+                    Map<String, String> info = restTemplate.getForEntity(
+                            "http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName() + "&port=" + oldUser
+                                    .getContainerPort(), Map.class).getBody();
                     log.info(user.getContainerLocation() + " ] 建立容器 -> " + info);
                     user = Tools.updateInfo(user, info);
                     // 删除旧容器
                     deleteContainerByContainerId(oldUser.getContainerId(), true);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                }
+                catch (Exception e)
+                {
                     log.error("[换机房失败]");
+                    log.error(e.toString());
                 }
             }
 
@@ -171,13 +190,14 @@ public class AdminUserController {
         return "redirect:/admin?page=" + this.currentPage;
     }
 
-
-    private void deleteContainerByContainerId(String containerId, Boolean deleteContainerLocation) {
+    private void deleteContainerByContainerId(String containerId, Boolean deleteContainerLocation)
+    {
         User user = userRepository.findByContainerId(containerId);
         restTemplate.getForEntity("http://" + user.getContainerLocation() + "/deleteContainer?id=" + containerId, Integer.class);
         user.setContainerStatus("");
         user.setContainerId("");
-        if (deleteContainerLocation) {
+        if (deleteContainerLocation)
+        {
             user.setContainerPort("");
             user.setContainerLocation("");
         }
@@ -187,73 +207,91 @@ public class AdminUserController {
     }
 
     @GetMapping("/deleteContainer")
-    public String deleteContainer(@RequestParam("id") String containerId, @RequestParam("role") String role) throws DockerException, InterruptedException {
+    public String deleteContainer(@RequestParam("id") String containerId, @RequestParam("role") String role)
+            throws DockerException, InterruptedException
+    {
         deleteContainerByContainerId(containerId, true);
-        if (role.equals("admin")) {
+        if (role.equals("admin"))
+        {
             return "redirect:/admin?page=" + this.currentPage;
         }
         return "redirect:/user/findUserByWechatName?wechatName=" + role;
     }
 
     @GetMapping("/startContainer")
-    public String startContainer(@RequestParam("id") String containerId, @RequestParam("role") String role) {
+    public String startContainer(@RequestParam("id") String containerId, @RequestParam("role") String role)
+    {
         User user = userRepository.findByContainerId(containerId);
-        String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/startContainer?id=" + containerId, String.class).getBody();
+        String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/startContainer?id=" + containerId, String.class)
+                .getBody();
         user.setContainerStatus(status);
         userRepository.save(user);
-        if (role.equals("admin")) {
+        if (role.equals("admin"))
+        {
             return "redirect:/admin?page=" + this.currentPage;
         }
         return "redirect:/user/findUserByWechatName?wechatName=" + role;
     }
 
     @GetMapping("/reCreateContainer")
-    public String reCreateContainer(@RequestParam("id") String containerId, @RequestParam("role") String role) {
+    public String reCreateContainer(@RequestParam("id") String containerId, @RequestParam("role") String role)
+    {
         User user = userRepository.findByContainerId(containerId);
         containerService.reCreateContainerByUser(client, user, restTemplate);
-        if (role.equals("admin")) {
+        if (role.equals("admin"))
+        {
             return "redirect:/admin?page=" + this.currentPage;
         }
         return "redirect:/user/findUserByWechatName?wechatName=" + role;
     }
 
     @GetMapping("/restartContainer")
-    public String restartContainer(@RequestParam("id") String containerId, @RequestParam("role") String role) {
+    public String restartContainer(@RequestParam("id") String containerId, @RequestParam("role") String role)
+    {
         User user = userRepository.findByContainerId(containerId);
-        String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/restartContainer?id=" + containerId, String.class).getBody();
+        String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/restartContainer?id=" + containerId, String.class)
+                .getBody();
         user.setContainerStatus(status);
         userRepository.save(user);
-        if (role.equals("admin")) {
+        if (role.equals("admin"))
+        {
             return "redirect:/admin?page=" + this.currentPage;
         }
         return "redirect:/user/findUserByWechatName?wechatName=" + role;
     }
 
     @GetMapping("/stopContainer")
-    public String stopContainer(@RequestParam("id") String containerId, @RequestParam("role") String role) {
+    public String stopContainer(@RequestParam("id") String containerId, @RequestParam("role") String role)
+    {
         stopContainerByContainerId(containerId);
-        if (role.equals("admin")) {
+        if (role.equals("admin"))
+        {
             return "redirect:/admin?page=" + this.currentPage;
         }
         return "redirect:/user/findUserByWechatName?wechatName=" + role;
     }
 
-    private void stopContainerByContainerId(String containerId) {
+    private void stopContainerByContainerId(String containerId)
+    {
         User user = userRepository.findByContainerId(containerId);
-        String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/stopContainer?id=" + containerId, String.class).getBody();
+        String status = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/stopContainer?id=" + containerId, String.class)
+                .getBody();
         user.setContainerStatus(status);
         userRepository.save(user);
     }
 
     @GetMapping("/delete")
-    public String delete(Integer id, @RequestParam("role") String role) {
+    public String delete(Integer id, @RequestParam("role") String role)
+    {
         User user = userRepository.findById(id).get();
         String containerId = user.getContainerId();
-        if (!StringUtils.isEmpty(user.getContainerLocation())) {
+        if (!StringUtils.isEmpty(user.getContainerLocation()))
+        {
             restTemplate.getForEntity("http://" + user.getContainerLocation() + "/deleteContainer?id=" + containerId, Integer.class).getBody();
         }
         userRepository.deleteById(id);
-        if (role.equals("admin")) {
+        if (role.equals("admin"))
+        {
             return "redirect:/admin?page=" + this.currentPage;
         }
         return "redirect:/findUserByWechatName?wechatName=" + role;
@@ -261,25 +299,35 @@ public class AdminUserController {
 
     @GetMapping("/findUserById")
     @ResponseBody
-    public User findUserById(@RequestParam("id") Integer id) {
+    public User findUserById(@RequestParam("id") Integer id)
+    {
         return userRepository.findById(id).get();
     }
 
-    private Map<String, Integer> getLocations(boolean withCount) {
+    private Map<String, Integer> getLocations(boolean withCount)
+    {
         List<String> services = client.getServices();
         Map<String, Integer> available_Services = new HashMap<>();
-        for (String service : services) {
-            if (service.contains("campur")) {
-                try {
+        for (String service : services)
+        {
+            if (service.contains("campur"))
+            {
+                try
+                {
                     int nb = 0;
-                    if (withCount) {
+                    if (withCount)
+                    {
                         nb = userRepository.countByContainerLocation(service);
-//                        nb = restTemplate.getForEntity("http://" + service + "/containerCount", Integer.class).getBody();
-                    } else {
+                        //                        nb = restTemplate.getForEntity("http://" + service + "/containerCount", Integer.class).getBody();
+                    }
+                    else
+                    {
                         nb = 0;
                     }
                     available_Services.put(service, nb);
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     log.error(service + " --> 无响应");
                 }
             }
@@ -288,15 +336,19 @@ public class AdminUserController {
     }
 
     @GetMapping("/refreshNetwork")
-    public String refreshNetwork(@RequestParam("instanceLocation") String instanceLocation) {
+    public String refreshNetwork(@RequestParam("instanceLocation") String instanceLocation)
+    {
         List<User> listUsers = userRepository.findAll();
-        if (instanceLocation.equals("all")) {
+        if (instanceLocation.equals("all"))
+        {
             listUsers.stream().forEach(user -> {
                 containerService.refreshUserNetwork(user, restTemplate, log);
             });
-        } else {
+        }
+        else
+        {
             listUsers.stream().filter(instance ->
-                    instance.getContainerLocation().equals(instanceLocation)
+                                              instance.getContainerLocation().equals(instanceLocation)
             ).forEach(user -> {
                 containerService.refreshUserNetwork(user, restTemplate, log);
             });
@@ -306,24 +358,31 @@ public class AdminUserController {
     }
 
     @GetMapping("/reCreateAllContainers")
-    public String reCreateAllContainers() {
+    public String reCreateAllContainers()
+    {
         List<User> listUsers = userRepository.findAll();
         log.info("[Admin][containers] all containers : " + listUsers.size());
         listUsers.forEach(user -> {
             String containerId = user.getContainerId();
             log.warn("[User](" + user.getWechatName() + ") will destroy :" + containerId);
-            try {
+            try
+            {
                 stopContainerByContainerId(containerId);
                 user.setContainerStatus("exited");
                 log.warn("[User][STOP](OK)(" + user.getWechatName() + ") container was [stopped] :" + containerId);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 log.error("[STOP](KO)-> " + containerId + ": container not found！");
                 log.error(e.getMessage());
             }
-            try {
+            try
+            {
                 deleteContainerByContainerId(user.getContainerId(), false);
                 log.warn("[User][DEL](OK)(" + user.getWechatName() + ") container was [deleted] :" + containerId);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 log.error("[DEL](KO)-> " + containerId + ": container not found！");
                 log.error(e.getMessage());
             }
@@ -335,16 +394,21 @@ public class AdminUserController {
     }
 
     @GetMapping("/updateQrCode")
-    public String updateQrCode() {
+    public String updateQrCode()
+    {
         List<User> listUsers = userRepository.findAll();
         listUsers.forEach(user -> {
-            try {
-                user.setQrCode(Tools.getSSRUrl(user.getContainerLocation() + ".qfdk.me", user.getContainerPort(), Tools.getPass(user.getWechatName()), user.getContainerLocation()));
+            try
+            {
+                user.setQrCode(Tools.getSSRUrl(user.getContainerLocation() + ".qfdk.me", user.getContainerPort(), Tools.getPass(user.getWechatName()),
+                                               user.getContainerLocation()));
                 userRepository.save(user);
                 log.info("[Admin][updateQrCode](OK)  updateQrCode for " + user.getWechatName() + " was succeed.");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+            }
+            catch (UnsupportedEncodingException e)
+            {
                 log.error("[Admin][updateQrCode](KO)  updateQrCode.");
+                log.error(e.toString());
 
             }
         });
@@ -352,17 +416,21 @@ public class AdminUserController {
     }
 
     @GetMapping("/cleanNetworks")
-    public String cleanNetworks() {
+    public String cleanNetworks()
+    {
         List<User> listUsers = userRepository.findAll();
         listUsers.forEach(user -> {
-            try {
+            try
+            {
                 user.setNetworkRx(0);
                 user.setNetworkTx(0);
                 userRepository.save(user);
                 log.info("[Admin][cleanNetworks](OK)  cleanNetworks for " + user.getWechatName() + " was succeed.");
-            } catch (Exception e) {
-                e.printStackTrace();
+            }
+            catch (Exception e)
+            {
                 log.error("[Admin][cleanNetworks](KO)  cleanNetworks.");
+                log.error(e.toString());
             }
         });
         return "redirect:/admin?page=" + this.currentPage;

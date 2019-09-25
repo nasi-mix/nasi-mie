@@ -42,8 +42,8 @@ public class ContainerService {
             userRepository.save(user);
             logger.info("[Network Traffic](OK)-> " + user.getWechatName());
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("[Network Traffic](KO)-> " + user.getWechatName());
+            logger.error(e.toString());
             user.setNetworkTx(0.0);
             user.setNetworkRx(0.0);
             userRepository.save(user);
@@ -58,7 +58,7 @@ public class ContainerService {
             logger.info("[User][Container](OK) : " + user.getContainerId());
         } catch (Exception e) {
             logger.error("[User][Container](KO) -> " + user.getWechatName());
-            e.printStackTrace();
+            logger.error(e.toString());
         }
     }
 
@@ -70,7 +70,7 @@ public class ContainerService {
             logger.info("[User][Container](OK) : " + user.getContainerId());
         } catch (Exception e) {
             logger.error("[User][Container](KO) -> " + user.getWechatName());
-            e.printStackTrace();
+            logger.error(e.toString());
         }
     }
 
