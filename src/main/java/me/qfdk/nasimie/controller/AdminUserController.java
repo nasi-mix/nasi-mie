@@ -238,6 +238,7 @@ public class AdminUserController
     {
         User user = userRepository.findByContainerId(containerId);
         containerService.reCreateContainerByUser(client, user, restTemplate);
+        log.info("[User][reCreateContainer] {} 重建容器(二维码) 成功", user.getWechatName());
         if (role.equals("admin"))
         {
             return "redirect:/admin?page=" + this.currentPage;
