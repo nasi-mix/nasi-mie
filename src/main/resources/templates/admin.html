@@ -63,7 +63,8 @@
                 重建QrCode</a>
             <a class="btn btn-primary refresh" href="/cleanNetworks"><span class="glyphicon glyphicon-trash"></span>
                 清空流量</a>
-            <a class="btn btn-danger refresh disabled" href="/reCreateAllContainers"><span class="glyphicon glyphicon-retweet"></span> 重建所有容器</a>
+            <a class="btn btn-danger refresh disabled" href="/reCreateAllContainers"><span
+                    class="glyphicon glyphicon-retweet"></span> 重建所有容器</a>
         </div>
         <div class="col-md-6">
             <form class="form-inline" method="get" action="/refreshNetwork">
@@ -110,7 +111,10 @@
                        th:text="${user.wechatName}"></a>
                 </td>
                 <td th:text="${user.nickname}"></td>
-                <td th:text="${user.containerLocation}"></td>
+                <td>
+                    <span th:utext="${user.pontLocation!='non'}?'<span class=\'glyphicon glyphicon-send\'>':''"></span>
+                    <span th:utext="${user.containerLocation}"></span>
+                </td>
                 <td th:text="${#dates.format(user.endTime, 'yyyy-MM-dd')}"></td>
                 <td th:utext="${user.isEnable}?'<span class=\'label label-success btn-xs\'>已付款</span>':'<span class=\'label label-danger btn-xs\'>未付款</span>'"></td>
                 <td th:utext="${user.isEnableSelfControl()}?'<span class=\'label label-primary btn-xs\'>自主控制</span>':'<span class=\'label label-warning btn-xs\'>未达到要求</span>'"></td>

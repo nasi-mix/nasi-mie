@@ -1,7 +1,6 @@
 package me.qfdk.nasimie.tools;
 
 import me.qfdk.nasimie.entity.User;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
@@ -25,10 +24,10 @@ public class Tools {
         user.setContainerStatus(info.get("status"));
         user.setContainerPort(info.get("port"));
         String pontLocation = user.getPontLocation();
-        if (StringUtils.isEmpty(pontLocation)) {
+        if (pontLocation.trim().equals("non")) {
             user.setQrCode(Tools.getSSRUrl(user.getContainerLocation() + ".qfdk.me", info.get("port"), info.get("pass"), user.getContainerLocation()));
         } else {
-            user.setQrCode(Tools.getSSRUrl(pontLocation + ".qfdk.me", info.get("port"), info.get("pass"), user.getContainerLocation() + " with proxy via " + pontLocation));
+            user.setQrCode(Tools.getSSRUrl(pontLocation + ".qfdk.me", info.get("port"), info.get("pass"), pontLocation.split("nasi-campur-")[1] + " => " + user.getContainerLocation().split("nasi-campur-")[1]));
         }
         return user;
     }

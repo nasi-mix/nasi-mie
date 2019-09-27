@@ -48,7 +48,9 @@
                 <div class="form-inline col-md-10 col-md-offset-2" style="font-size: 1.2em;">
                     <div class="form-group col-md-5">
                         <label class="control-label" for="containerLocation">实例区域：</label>
-
+                        <p th:if="${user.pontLocation!='non'}"
+                           th:text="${user.pontLocation}+' => '" th:remove="tag">
+                        </p>
                         <p class="form-control-static" id="containerLocation"
                            th:text="${user.containerLocation}"></p>
                     </div>
@@ -92,29 +94,31 @@
                             <a data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..." data-toggle="tooltip"
                                data-placement="top" title="启动服务，成功后扫码二维码即可" th:if="${user.containerStatus=='exited'}"
                                th:href="'/startContainer?id='+${user.containerId}+'&role='+${user.wechatName}"
-                               class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-play"></span> 启动</a>
+                               class="btn btn-primary btn-xs load"><span class="glyphicon glyphicon-play"></span> 启动</a>
                             <a th:classappend="${user.isEnable}?'':'disabled'"
                                data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..."
                                th:if="${user.containerStatus=='created'}"
                                th:href="'/startContainer?id='+${user.containerId}+'&role='+${user.wechatName}"
-                               class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-play"></span> 开始服务</a>
+                               class="btn btn-primary btn-xs load"><span class="glyphicon glyphicon-play"></span>
+                                开始服务</a>
                             <a th:classappend="${user.isEnable}?'':'disabled'"
                                data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..." data-toggle="tooltip"
                                data-placement="top" title="停止服务，您将无法连接服务器" th:if="${user.containerStatus=='running'}"
                                th:href="'/stopContainer?id='+${user.containerId}+'&role='+${user.wechatName}"
-                               class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-off"></span> 停止</a>
+                               class="btn btn-danger btn-xs load"><span class="glyphicon glyphicon-off"></span> 停止</a>
                             <a th:classappend="${user.isEnable}?'':'disabled'"
                                data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..." data-toggle="tooltip"
                                data-placement="top" title="重启的时间可能会很长，但是小于30s"
                                th:if="${user.containerStatus=='running'}"
                                th:href="'/restartContainer?id='+${user.containerId}+'&role='+${user.wechatName}"
-                               class="btn btn-warning btn-xs"><span class="glyphicon glyphicon-refresh"></span> 重启</a>
+                               class="btn btn-warning btn-xs load"><span class="glyphicon glyphicon-refresh"></span> 重启</a>
 
                             <a th:classappend="${user.isEnable}?'':'disabled'"
                                data-loading-text="<i class='fa fa-spinner fa-spin'></i> 请等待 ..." data-toggle="tooltip"
                                data-placement="top" title="重建容器，但是小于30s"
                                th:href="'/reCreateContainer?id='+${user.containerId}+'&role='+${user.wechatName}"
-                               class="btn btn-info btn-xs"><span class="glyphicon glyphicon-random"></span> 重建二维码</a>
+                               class="btn btn-info btn-xs load"><span class="glyphicon glyphicon-random"></span>
+                                重建二维码</a>
                         </p>
                         <p class="form-control-static" th:if="!${user.isEnableSelfControl()}">
                             <span class="label label-warning">未达到要求</span>
@@ -125,21 +129,27 @@
         </div>
         <input type="hidden" th:value="${user.getContainerId()}" id="containerId">
 
-        <div class="alert alert-info">
-            <p><b>请点击以下链接，自动添加服务器 : </b></p>
-            <a style="word-wrap: break-word;" th:href="@{ssr://__${user.getQrCode()}__}"
-               th:text="@{ssr://__${user.getQrCode()}__}"></a>
-        </div>
+        <!--        <div class="alert alert-info">-->
+        <!--            <p>-->
+        <!--                <b>快速开始 : </b>-->
+        <!--                <a class="btn btn-primary" style="word-wrap: break-word;" th:href="@{ssr://__${user.getQrCode()}__}"-->
+        <!--                   th:text="点击此按钮添加服务器"></a>-->
+        <!--            </p>-->
+        <!--        </div>-->
 
         <div class="panel panel-success">
             <div class="panel-heading text-center">
                 <h3 class="panel-title">
-                        <span>App扫描二维码快速开始</span>
+                    <span>使用App扫描二维码 或 </span>
+                    <a class="btn btn-primary" style="color: white;" th:href="@{ssr://__${user.getQrCode()}__}"
+                       th:text="点击此按钮"></a>
+                    <span>添加服务器</span>
                 </h3>
             </div>
             <div class="panel-body">
                 <img id="url" class="img-responsive center-block"
                      th:src="@{/api/qrCode?str=ssr://__${user.getQrCode()}__}" alt="二维码">
+                <p class="text-center">服务器二维码</p>
             </div>
         </div>
 
@@ -149,10 +159,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js"></script>
 <script>
     function loading() {
-        $('a.btn').on('click', function () {
+        $('.load').on('click', function () {
             $(this).button('loading');
         });
     }
+
     loading();
 </script>
 </body>
