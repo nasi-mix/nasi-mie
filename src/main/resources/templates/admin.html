@@ -56,39 +56,33 @@
         </div><!-- /.navbar-collapse -->
     </nav>
 
-    <div class="col-md-12">
-        <div class="col-md-1">
+    <div class="row">
+        <div class="col-md-6">
             <button class="btn btn-success addUser"><span class="glyphicon glyphicon-plus"></span> 新增用户</button>
-
-        </div>
-        <div class="col-md-1">
-
             <a class="btn btn-primary refresh" href="/updateQrCode"><span class="glyphicon glyphicon-refresh"></span>
                 重建QrCode</a>
-        </div>
-        <div class="col-md-1">
-            <a class="btn btn-primary refresh" href="/cleanNetworks"><span class="glyphicon glyphicon-refresh"></span>
+            <a class="btn btn-primary refresh" href="/cleanNetworks"><span class="glyphicon glyphicon-trash"></span>
                 清空流量</a>
+            <a class="btn btn-danger refresh disabled" href="/reCreateAllContainers"><span class="glyphicon glyphicon-retweet"></span> 重建所有容器</a>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-6">
             <form class="form-inline" method="get" action="/refreshNetwork">
-                <select id="instanceLocation" name="instanceLocation" class="form-control">
-                    <option value="all" selected="selected">--- 选择服务区 ---</option>
-                    <option th:each="key,it:${locations.keySet()}" th:value="${key}">
-                        <span th:text="${key}"></span>
-                        <span th:text="' ('+${locations.get(key)}+')'"></span>
-                    </option>
-                </select>
-                <button class="btn btn-primary refresh">
-                    <span class="glyphicon glyphicon-refresh"></span>
-                    <span>刷新流量</span>
-                </button>
+                <div class="form-group">
+                    <select id="instanceLocation" name="instanceLocation" class="form-control">
+                        <option value="all" selected="selected">--- 选择服务区 ---</option>
+                        <option th:each="key,it:${locations.keySet()}" th:value="${key}">
+                            <span th:text="${key}"></span>
+                            <span th:text="' ('+${locations.get(key)}+')'"></span>
+                        </option>
+                    </select>
+                    <button class="btn btn-primary refresh">
+                        <span class="glyphicon glyphicon-refresh"></span>
+                        <span>刷新流量</span>
+                    </button>
+                </div>
             </form>
         </div>
     </div>
-    <!--    <a class="btn btn-primary refresh" href="/reCreateAllContainers"><span class="glyphicon glyphicon-refresh"></span> 重建所有容器</a>-->
-
-
     <div class="card">
         <table class="table table-hover">
             <thead>
