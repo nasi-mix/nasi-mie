@@ -146,7 +146,7 @@ public class AdminUserController
                     {
                         Integer.parseInt(user.getContainerPort());
                         restTemplate.getForEntity("http://" + user.getPontLocation() + "/deletePont?port=" + user.getContainerPort(), String.class);
-                        log.info("[添加端口转发删除] {} -> {}", user.getPontLocation(), user.getContainerPort());
+                        log.info("[删除端口转发] {} -> {}", user.getPontLocation(), user.getContainerPort());
                     }
                     catch (Exception e)
                     {
