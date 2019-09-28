@@ -126,16 +126,18 @@ public class AdminUserController {
                                     .getContainerPort() + "&sshUser=root" + "&sshPassword=" + sshPassword, String.class);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-                log.error(e.toString());
+                log.error("[添加端口转发]{}", e.getMessage());
             }
         } else {
+            // 老用户
             User oldUser = userRepository.findById(user.getId()).get();
             //检查是否换机房
             if (!oldUser.getContainerLocation().equals(user.getContainerLocation())) {
                 log.info("[换机房] [" + user.getWechatName() + "] " + oldUser.getContainerLocation() + " --> " + user.getContainerLocation());
 
                 try {
+                    // 删除转发
+                    deleteProxyPort(user);
                     // 建立新容器
                     Map info = restTemplate.getForEntity(
                             "http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName() + "&port=" + oldUser
@@ -146,8 +148,7 @@ public class AdminUserController {
                     // 删除旧容器
                     deleteContainerByContainerId(oldUser.getContainerId(), true);
                 } catch (Exception e) {
-                    log.error("[换机房失败]");
-                    log.error(e.toString());
+                    log.error("[换机房失败]{}", e.toString());
                 }
             }
 
@@ -157,6 +158,7 @@ public class AdminUserController {
     }
 
     private void deleteProxyPort(User user) {
+        //判断是否有端口转发
         if (!user.getPontLocation().trim().equals("non")) {
             try {
                 log.info("[删除端口转发] {} -> {}", user.getPontLocation(), user.getContainerPort());
@@ -373,4 +375,11 @@ public class AdminUserController {
         });
         return "redirect:/admin?page=" + this.currentPage;
     }
+
+    @GetMapping("/getProxyList")
+    @ResponseBody
+    public List<User> getProxyPort(@RequestParam("location") String location) {
+        return userRepository.findUsersByPontLocation(location);
+    }
+
 }
