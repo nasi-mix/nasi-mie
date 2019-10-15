@@ -379,7 +379,7 @@ public class AdminUserController {
     @GetMapping("/getProxyList")
     @ResponseBody
     public List<User> getProxyPort(@RequestParam("location") String location) {
-        log.info("[nasi-campur] getProxyList");
+        log.info("[" + location + "] => getProxyList");
         return userRepository.findUsersByPontLocation(location);
     }
 
