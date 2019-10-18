@@ -109,6 +109,12 @@ public class AdminUserController {
         return getLocations(true);
     }
 
+    @GetMapping("/getSSHPassword")
+    @ResponseBody
+    public String getSSHPassword() {
+        return sshPassword;
+    }
+
     @PostMapping("/save")
     public String save(User user) {
         // 新用户
