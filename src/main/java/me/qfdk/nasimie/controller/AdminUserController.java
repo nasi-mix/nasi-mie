@@ -109,6 +109,12 @@ public class AdminUserController {
         return getLocations(true);
     }
 
+    @GetMapping("/getSSHPassword")
+    @ResponseBody
+    public String getSSHPassword() {
+        return sshPassword;
+    }
+
     @PostMapping("/save")
     public String save(User user) {
         // 新用户
@@ -254,7 +260,9 @@ public class AdminUserController {
     public String delete(Integer id, @RequestParam("role") String role) {
         User user = userRepository.findById(id).get();
         // 删除端口转发
-        deleteProxyPort(user);
+        if (null != user.getPontLocation()) {
+            deleteProxyPort(user);
+        }
         String containerId = user.getContainerId();
         if (!StringUtils.isEmpty(user.getContainerLocation())) {
             restTemplate.getForEntity("http://" + user.getContainerLocation() + "/deleteContainer?id=" + containerId, Integer.class).getBody();
