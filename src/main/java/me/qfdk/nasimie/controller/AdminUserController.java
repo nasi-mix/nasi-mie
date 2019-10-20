@@ -212,7 +212,7 @@ public class AdminUserController {
     @GetMapping("/reCreateContainer")
     public String reCreateContainer(@RequestParam("id") String containerId, @RequestParam("role") String role) {
         User user = userRepository.findByContainerId(containerId);
-        containerService.reCreateContainerByUser(client, user, restTemplate);
+        containerService.reCreateContainerByUser(user, restTemplate);
         log.info("[User][reCreateContainer] {} 重建容器(二维码) 成功", user.getWechatName());
         if (role.equals("admin")) {
             return "redirect:/admin?page=" + this.currentPage;
@@ -281,9 +281,6 @@ public class AdminUserController {
                     int nb = 0;
                     if (withCount) {
                         nb = userRepository.countByContainerLocation(service);
-                        //                        nb = restTemplate.getForEntity("http://" + service + "/containerCount", Integer.class).getBody();
-                    } else {
-                        nb = 0;
                     }
                     available_Services.put(service, nb);
                 } catch (Exception e) {
@@ -336,7 +333,7 @@ public class AdminUserController {
             }
 
         });
-        listUsers.forEach(user -> containerService.reCreateContainer(client, user, restTemplate));
+        listUsers.forEach(user -> containerService.reCreateContainer(user, restTemplate));
         log.info("[Admin][Containers](OK) was created.");
         return "redirect:/admin?page=" + this.currentPage;
     }
@@ -374,12 +371,6 @@ public class AdminUserController {
             }
         });
         return "redirect:/admin?page=" + this.currentPage;
-    }
-
-    @GetMapping("/getProxyList")
-    @ResponseBody
-    public List<User> getProxyPort(@RequestParam("location") String location) {
-        return userRepository.findUsersByPontLocation(location);
     }
 
 }

@@ -43,14 +43,14 @@ public class ContainerService {
             logger.info("[Network Traffic](OK)-> " + user.getWechatName());
         } catch (Exception e) {
             logger.error("[Network Traffic](KO)-> " + user.getWechatName());
-            logger.error(e.toString());
-            user.setNetworkTx(0.0);
-            user.setNetworkRx(0.0);
-            userRepository.save(user);
+            logger.error(e.getMessage());
+//            user.setNetworkTx(0.0);
+//            user.setNetworkRx(0.0);
+//            userRepository.save(user);
         }
     }
 
-    public void reCreateContainer(DiscoveryClient client, User user, RestTemplate restTemplate) {
+    public void reCreateContainer(User user, RestTemplate restTemplate) {
         logger.info("[User][Container](" + user.getWechatName() + ") will create a new container.");
         try {
             Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/createContainer?wechatName=" + user.getWechatName() + "&port=" + user.getContainerPort(), Map.class).getBody();
@@ -62,7 +62,7 @@ public class ContainerService {
         }
     }
 
-    public void reCreateContainerByUser(DiscoveryClient client, User user, RestTemplate restTemplate) {
+    public void reCreateContainerByUser(User user, RestTemplate restTemplate) {
         logger.info("[User][Container](" + user.getWechatName() + ") will recreate a new container.");
         try {
             Map<String, String> info = restTemplate.getForEntity("http://" + user.getContainerLocation() + "/reCreateContainer?wechatName=" + user.getWechatName(), Map.class).getBody();
