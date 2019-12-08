@@ -75,7 +75,7 @@ class List extends React.Component {
         this.data.img.style = "display:none;"
         this.prepareTimeOut();
         if (!this.data.testTimeOut) {
-            this.data.img.src = currentLine.current.props.url + "" + Math.random();
+            this.data.img.src = currentLine.current.props.url + "actuator/info";
         }
     }
     doNextTarget() {
@@ -93,7 +93,7 @@ class List extends React.Component {
         this.data.img.style = "display:none;"
         this.prepareTimeOut();
         if (!this.data.testTimeOut) {
-            this.data.img.src = currentLine.current.props.url + "" + Math.random();
+            this.data.img.src = currentLine.current.props.url + "actuator/info";
         }
     }
     onLoaded() {
@@ -147,7 +147,7 @@ class List extends React.Component {
         this.updateCount();
         this.prepareTimeOut();
         if (!this.data.testTimeOut) {
-            this.data.img.src = currentLine.current.props.url + Math.random();
+            this.data.img.src = currentLine.current.props.url +"actuator/info";
         }
     }
     render() {
