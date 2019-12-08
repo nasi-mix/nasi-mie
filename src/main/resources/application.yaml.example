@@ -1,0 +1,41 @@
+eureka:
+    client:
+        serviceUrl:
+            defaultZone: http://user:pass@localhost:8761/eureka/
+    instance:
+        ip-address:
+        prefer-ip-address: true
+        instance-id: ${eureka.instance.ip-address}:${spring.application.name}:${server.port}
+server:
+    port: 8899
+    schedules: 0 0/30 * * * ?
+nasiCampurSsh:
+  sshPassword: todo
+spring:
+    application:
+        name: nasi-mie
+    datasource:
+        driver-class-name: com.mysql.jdbc.Driver
+        hikari:
+            connection-init-sql: SET NAMES utf8mb4
+        url: jdbc:mysql://127.0.0.1:3306/ssr?autoReconnect=true&useUnicode=true&characterEncoding=utf-8
+        username: root
+        password:
+    jackson:
+        date-format: yyyy-MM-dd
+        time-zone: GMT+2
+    jpa:
+        hibernate:
+            ddl-auto: update
+            naming:
+                physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    mvc:
+        favicon:
+            enabled: true
+    thymeleaf:
+        cache: true
+management:
+  endpoints:
+      web:
+        exposure:
+          include: health,info,env,metrics,prometheus

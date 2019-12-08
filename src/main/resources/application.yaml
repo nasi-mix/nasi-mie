@@ -12,7 +12,7 @@ server:
   port: 8899
   schedules: 0 0/30 * * * ?
 nasiCampurSsh:
-  sshPassword: Lihaozhi20
+  sshPassword:
 spring:
   application:
     name: nasi-mie
